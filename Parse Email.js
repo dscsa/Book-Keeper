@@ -10,6 +10,9 @@ function findTotal(parsed, body) {
   var isTotal  = /(total:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?! \d| \$)/i
   var isMatch  = subject.match(isTotal) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
 
+  if ( ! isMatch)
+    isMatch  = body.match(isTotal)
+
   if ( ! isMatch) return
 
   var total = isMatch[2] || isMatch[3] //total will always be the 2nd or third capture group
