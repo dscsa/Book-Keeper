@@ -359,6 +359,7 @@ function parseSubject(submitted, message) {
     classes:[],
     accounts:[],
     vendors:[],
+    from:getName(message),
     subject:subject
   }
 
@@ -439,7 +440,7 @@ function getSheetLink(type, singular) {
 
 //Get rid of line breaks and indentation around arrays in order to save vertical space
 function prettyJson(obj) {
-  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"invoiceAmts"|"total"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"programs"|"classes"|"accounts"|"vendors"|"exact")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
+  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"invoiceAmts"|"total"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"programs"|"classes"|"accounts"|"vendors"|"exact"|"from")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
 }
 
 function addLabel(thread, label) {

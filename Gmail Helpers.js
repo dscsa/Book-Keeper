@@ -6,10 +6,10 @@
 
 
 function getDate(message) {
-  
+
   var to = getTo(message)
   var subject = message.getSubject()
-  
+
   return getYYYYMMDD(to)
     || getMMDDYYYY(to)
     || getYYYYMMDD(subject)
@@ -32,9 +32,9 @@ function getMMDDYYYY(string) {
 
 function getForwardedDate(string) {
   var date = string.match(/Date:(.*?)($|<br)/mi)
-  
-  
-  
+
+
+
   if (date) {
     //Mon, Apr 2, 2018 at 1:06 PM
     //April 11, 2018 at 9:42:37 PM EDT
@@ -45,24 +45,32 @@ function getForwardedDate(string) {
     //April 23, 2018 at 12:57:27 AM EDT
     var year  = date[1].match(/\b\d{4}\b/)
     var day   = date[1].match(/\b\d{1,2}\b/)
-    var month = getMonth(date[1])  
+    var month = getMonth(date[1])
     //string = string.replace(/</g, '[').replace(/>/g, ']') //sanitize
     //debugEmail('getForwardedDate', year+'-'+month+'-'+('0'+day).slice(-2), year, month, day, date.index, string.slice(date.index-200, date.index+200), '@@@@@@@@', string)
-    
+
     return year+'-'+month+'-'+('0'+day).slice(-2)
   }
 }
-  
+
 function getSentDate(message) {
   return message.getDate().toJSON().slice(0, 10)
 }
 
 function getTo(message) {
-  return getForward(message)[1] || message.getTo() 
+  return getForward(message)[1] || message.getTo()
 }
 
 function getFrom(message) {
-  return getForward(message)[0] || message.getFrom() 
+  return getForward(message)[0] || message.getFrom()
+}
+
+function getName(message) {
+  var name = getFrom(message).replace(/<.*?>/g, '').split(/ |@|_|\./) //Remove any hyperlinks and try to get the first name only
+  return {
+    first:name[0][0].toUpperCase()+name[0].slice(1).toLowerCase(),
+    last:name[1][0] == '@' ? '' : name[1][0].toUpperCase()+name[1].slice(1).toLowerCase()
+  }
 }
 
 //X-Forwarded-For is used by gmail forwarding, not sure if its a universal standard though
@@ -78,14 +86,13 @@ function findDate(parsed, message) {
 }
 
 function reply(message, body, attachments, subject) {
-  var firstName = getFrom(message).replace(/<.*?>/g, '').split(/ |@|_|\./)[0] //Remove any hyperlinks and try to get the first name only
-  firstName = firstName[0].toUpperCase()+firstName.slice(1).toLowerCase() //fix capitalization
-  return message.forward(getFrom(message), { 
-    name:'Book Keeper', 
-    bcc:'adam.kircher@gmail.com', 
+  var name = getName(message)
+  return message.forward(getFrom(message), {
+    name:'Book Keeper',
+    bcc:'adam.kircher@gmail.com',
     attachments:attachments, //optional
     subject:subject,         //optional
-    htmlBody:'Hello '+firstName+',<br><br>'+body+'<br>Thanks,<br><a href="https://docs.google.com/spreadsheets/d/1klEQQ7u73D8y1UdPLu2C3xChQ1ZlLfEpGfhACe9WNXQ/edit">Mr. Keeper</a><br><br>Saving Medicine : Saving Lives<br><br>-----<br><br>'+message.getBody()+'<br>'
+    htmlBody:'Hello '+name.first+' '+name.last+',<br><br>'+body+'<br>Thanks,<br><a href="https://docs.google.com/spreadsheets/d/1klEQQ7u73D8y1UdPLu2C3xChQ1ZlLfEpGfhACe9WNXQ/edit">Mr. Keeper</a><br><br>Saving Medicine : Saving Lives<br><br>-----<br><br>'+message.getBody()+'<br>'
   })
 }
 
@@ -94,37 +101,37 @@ function getMonth(date) {
 
     if ( ~ date.indexOf('Jan'))
       return '01'
-      
+
     if ( ~ date.indexOf('Feb'))
       return '02'
-      
+
     if ( ~ date.indexOf('Mar'))
       return '03'
-      
+
     if ( ~ date.indexOf('Apr'))
       return '04'
-      
+
     if ( ~ date.indexOf('May'))
       return '05'
-      
+
     if ( ~ date.indexOf('Jun'))
       return '06'
-      
+
     if ( ~ date.indexOf('Jul'))
       return '07'
-      
+
     if ( ~ date.indexOf('Aug'))
       return '08'
-      
+
     if ( ~ date.indexOf('Sep'))
       return '09'
-      
+
     if ( ~ date.indexOf('Oct'))
       return '10'
-      
+
     if ( ~ date.indexOf('Nov'))
       return '11'
-      
+
     if ( ~ date.indexOf('Dec'))
       return '12'
 }
@@ -133,7 +140,7 @@ function getMonth(date) {
   var matchYYYYMMDD  = parsed.subject.match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2}),? /)
   var matchMMDDYYYY  = parsed.subject.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4}),? /)
   var matchEmailDate = body.match(/Date:(.*)/i) //Date will be in body if manually forwared or will be in subject if put there by parseTo for an autoforwared email
-  
+
   if (matchYYYYMMDD) {
     //Logger.log(['matchYYYYMMDD', matchYYYYMMDD])
     parsed.date = matchYYYYMMDD[1]+'-'+('0'+matchYYYYMMDD[2]).slice(-2)+'-'+('0'+matchYYYYMMDD[3]).slice(-2)
@@ -153,10 +160,7 @@ function getMonth(date) {
     //April 23, 2018 at 12:57:27 AM EDT
     var year  = matchEmailDate[1].match(/\b\d{4}\b/)
     var day   = matchEmailDate[1].match(/\b\d{1,2}\b/)
-    var month = getMonth(matchEmailDate[1])  
+    var month = getMonth(matchEmailDate[1])
     parsed.date = year+'-'+month+'-'+('0'+day).slice(-2)
   }
 }
-
-
-

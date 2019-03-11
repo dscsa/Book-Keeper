@@ -41,7 +41,7 @@ function findAmts(parsed, body) {
 
   parsed.amts = cleanAmts(matches)
 
-  debugEmail('findAmts', parsed.subject, matches, parsed)
+  debugEmail('findAmts', parsed.subject, matches, parsed, body)
 }
 
 function findInvoiceNos(parsed, subject) {
@@ -113,7 +113,12 @@ function inOrSum(parsed, val) {
 }
 
 function sum(arr) {
-  if ( ! arr) debugEmail('no array given sum()', new Error('no array given sum()').stack, arr)
+
+  if ( ! arr || ! arr.reduce) {
+    //debugEmail('no array given sum()', new Error('no array given sum()').stack, arr)
+    return 0
+  }
+
   return arr.reduce(function(sum, amt) { return +amt+sum }, 0)
 }
 
