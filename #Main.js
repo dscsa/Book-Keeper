@@ -49,7 +49,7 @@ function missingReceipts() {
 
   } catch (e) {
 
-    degugEmail('Book Keeper Error: missingReceipts', e)
+    debugEmail('Book Keeper Error: missingReceipts', e)
 
   }
 }
@@ -67,7 +67,7 @@ function scanInbox() {
 
   } catch (e) {
 
-    degugEmail('Book Keeper Error: scanInbox', e)
+    debugEmail('Book Keeper Error: scanInbox', e)
 
   }
 
@@ -85,7 +85,7 @@ function succesfulMatches() {
 
   } catch (e) {
 
-    degugEmail('Book Keeper Error: succesfulMatches', e)
+    debugEmail('Book Keeper Error: succesfulMatches', e)
 
   }
 }
@@ -104,7 +104,7 @@ function awaitingMatches() {
 
   } catch (e) {
 
-    degugEmail('Book Keeper Error: awaitingMatches', e)
+    debugEmail('Book Keeper Error: awaitingMatches', e)
 
   }
 }
@@ -346,14 +346,14 @@ function parseSubject(submitted, message) {
   var subject = removeComments(submitted.trim())
   var parsed  = { //Preserve ordering
     submitted:submitted,
+    date:null,
     errors:[],
     invoiceNos:null,
     invoiceAmts:null,
-    date:null,
     amts:[],
     percents:[],
-    total:null,
     inEmail:[],
+    total:null,
     attachments:message.getAttachments().length,
     programs:[],
     classes:[],
@@ -365,13 +365,14 @@ function parseSubject(submitted, message) {
   findDate(parsed, message)
   findTotal(parsed, body)
   findAmts(parsed, body)
-  findPercents(parsed, body)
 
-  findInvoiceNos(subject)
+  findInvoiceNos(parsed, subject)
   findInvoiceAmts(parsed)
 
-  findVendors(parsed, vendors, body)
+  defaultTotal(parsed, body)
+  findPercents(parsed, body)
 
+  findVendors(parsed, vendors, body)
   findPrograms(parsed, programs)
   findClasses(parsed, classes)
   findAccounts(parsed, accounts) //Do this last because it's the most greedy regex and can inadvertently mess up the others
@@ -438,7 +439,7 @@ function getSheetLink(type, singular) {
 
 //Get rid of line breaks and indentation around arrays in order to save vertical space
 function prettyJson(obj) {
-  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"total"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"programs"|"classes"|"accounts"|"vendors"|"exact")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
+  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"invoiceAmts"|"total"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"programs"|"classes"|"accounts"|"vendors"|"exact")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
 }
 
 function addLabel(thread, label) {

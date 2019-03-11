@@ -6,59 +6,45 @@ var amtRegEx = /\$?[\d,]*\d\.\d{2}(?!%)\b|\$[\d,]*\d\b/g //Make sure 33.33% is n
 function findTotal(parsed, body) {
   //Use the ending "(?! \d| \$)" to make sure "Fwd: 2017-11-13 Background Check One-Time GP 14.93 501c3 14.93 Total 29.86" match 29.86 and not 14.93.
   //"2019-03-11 Invoices 1654, 1655, 1647, 1688, 1537, 1637, 1661 , 1511, 1524, Marilyn Groves $5000 one-time, total $6345"
-  var totalRegEx = /(total:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?! \d| \$)/i
-  var total = parsed.subject.match(totalRegEx) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
-  parsed.subject = parsed.subject.replace(totalRegEx, '') //replace totals so they don't get confused with amts later
+  var subject  = parsed.subject
+  var isTotal  = /(total:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?! \d| \$)/i
+  var isMatch  = subject.match(isTotal) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
 
-  if (total) //total will always be the 2nd or third capture group
-    return parsed.total = cleanAmts([total[2] || total[3]])[0]
+  if ( ! isMatch) return
 
-  //Only Searching BEFORE "We hope to see you again soon." Avoids getting higher prices for "Buy It Again", "Bargain Recommendations", and "Customers who bought ... also bought"
-
-  var matches = body.split(/Top Picks for You|We hope to see you again soon|Buy It Again|Bargain Recommendations|Customers who bought|Recommended for you/i)[0].match(amtRegEx)
-  parsed.inEmail = matches ? cleanAmts(matches) : []
+  var total = isMatch[2] || isMatch[3] //total will always be the 2nd or third capture group
+  parsed.subject = subject.replace(isMatch[0], '') //replace totals so they don't get confused with amts later
+  parsed.total  = cleanAmts([total])[0]
+  debugEmail(subject, parsed.subject, isMatch, total, parsed)
 }
 
 function findPercents(parsed, body) {
 
+  parsed.percents = ['100']  //if no $s and no $s specified, then assume 100% of the total
+
   var pctRegEx = /\b-?\d{1,2}%/g
-  var matches  = cleanPercents(parsed.subject.match(pctRegEx) || [])
+  var matches  = parsed.subject.match(pctRegEx)
 
-  parsed.percents = matches.length ? parsed.percents.concat(matches) : ['100']  //if no $s and no $s specified, then assume 100% of the total
+  if ( ! matches) return
 
-  if (parsed.amts.length < 2) { //don't allow mixing of %s and $s right now.  Need way to preserve order if we mix.  Note default of 100% should fill in an empty amt if there is a total available
+  parsed.percents = cleanPercents(matches)
+
+  if (parsed.amts.length < 2) //don't allow mixing of %s and $s right now.  Need way to preserve order if we mix.  Note default of 100% should fill in an empty amt if there is a total available
     parsed.amts = parsed.percents.map(function(percent) { return percent*parsed.total/100 })
-  }
 }
 
 function findAmts(parsed, body) {
   //Test Case "Fwd: 2017-12-27 One-Time GLG $1000, Long Foundation $25,000, Cecilia Henig Individual $100, total $26,100"
   var amtRegEx = /-?\$?-?[\d,]*\d\.\d{2}|-?\$-?[\d,]*\d/g
 
-  var matches  = cleanAmts(parsed.subject.match(amtRegEx) || [])
+  var matches  = parsed.subject.match(amtRegEx) || []
 
-  //debugEmail('findAmts', parsed.subject, matches, parsed)
-  //if ( ! matches.length) return
+  parsed.amts = cleanAmts(matches)
 
-  parsed.amts  = parsed.amts.concat(matches || [])
-
-  if (parsed.amts.length == 1 && parsed.inEmail.length == 0) //Assume it's in an email attachment
-    parsed.total = parsed.amts[0]
-
-  else if (parsed.amts.length == 1 && inOrSum(parsed, parsed.amts[0]))
-    parsed.total = parsed.amts[0] //if the one amt in subject is specified is in the email body then trust it.
-
-  else if (parsed.amts.length > 1 && inOrSum(parsed, sum(parsed.amts))) //several amts in smight but no total have been explicly sent in the subject
-    parsed.total = sum(parsed.amts)
-
-  else if (parsed.total && inOrSum(parsed, parsed.total)) //if no amounts then trust user total if supplied and its in email
-    parsed.total = parsed.total
-
-  else if ( ! parsed.total && ! parsed.amts.length) //otherwise if no amts and no total provided, assume the total is the max amt in the body
-    parsed.total = Math.max.apply(null, parsed.inEmail)
+  debugEmail('findAmts', parsed.subject, matches, parsed)
 }
 
-function findInvoiceNos(subject) {
+function findInvoiceNos(parsed, subject) {
   //Errant space after 1661: "2019-03-11 Invoices 1654, 1655, 1647, 1688, 1537, 1637, 1661 , 1511, 1524, Marilyn Groves $5000 one-time, total $6345"
   var invoiceNos = subject.match(/\bInvoices? *#?(\d{1,4})([, ]+#?\d{1,4})*/ig)
   return parsed.invoiceNos =  invoiceNos ? invoiceNos[0].split(/[, ]+#?\b/).slice(1) : []
@@ -84,6 +70,32 @@ function findInvoiceAmts(parsed) {
 
     return invoice.TotalAmt
   })
+}
+
+function defaultTotal(parsed, body) {
+
+  if (parsed.total) return
+
+  //Only Searching BEFORE "We hope to see you again soon." Avoids getting higher prices for "Buy It Again", "Bargain Recommendations", and "Customers who bought ... also bought"
+
+  var matches = body.split(/Top Picks for You|We hope to see you again soon|Buy It Again|Bargain Recommendations|Customers who bought|Recommended for you/i)[0].match(amtRegEx)
+  parsed.inEmail = matches ? cleanAmts(matches) : []
+
+  var allAmts = parsed.amts.concat(parsed.invoiceAmts)
+
+  debugEmail('defaultTotal invoked', allAmts, parsed)
+
+  if (allAmts.length == 1 && parsed.inEmail.length == 0) //Assume it's in an email attachment
+    parsed.total = allAmts[0]
+
+  else if (allAmts.length == 1 && inOrSum(parsed, allAmts[0]))
+    parsed.total = allAmts[0] //if the one amt in subject is specified is in the email body then trust it.
+
+  else if (allAmts.length > 1 && inOrSum(parsed, sum(allAmts))) //several amts in smight but no total have been explicly sent in the subject
+    parsed.total = sum(allAmts)
+
+  else if (allAmts.length == 0) //otherwise if no amts and no total provided, assume the total is the max amt in the body
+    parsed.total = Math.max.apply(null, parsed.inEmail)
 }
 
 //Remove $ and , in amts e.g. $26,000 -> 26000
