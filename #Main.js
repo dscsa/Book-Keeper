@@ -344,6 +344,7 @@ function parseSubject(submitted, message) {
   submitted   = submitted.trim()
   var body    = message.getPlainBody()
   var subject = removeComments(submitted.trim())
+  var name    = getName(message)
   var parsed  = { //Preserve ordering
     submitted:submitted,
     date:null,
@@ -359,7 +360,7 @@ function parseSubject(submitted, message) {
     classes:[],
     accounts:[],
     vendors:[],
-    from:getName(message),
+    from:name.first+' '+name.last,
     subject:subject
   }
 
