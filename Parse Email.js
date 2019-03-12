@@ -10,8 +10,11 @@ function findTotal(parsed, body) {
   var isTotal  = /(total:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?! \d| \$)/i
   var isMatch  = subject.match(isTotal) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
 
-  if ( ! isMatch)
-    isMatch  = body.match(isTotal)
+  if ( ! isMatch) {
+    shortBody = body.split('- Forwarded message -')
+    shortBody = shortBody[0]+shortBody[1] //Don't include everything in forwarding chain since it might have lots of stuff
+    isMatch   = shortBody.match(isTotal)
+  }
 
   if ( ! isMatch) return
 
@@ -44,7 +47,7 @@ function findAmts(parsed, body) {
 
   parsed.amts = cleanAmts(matches)
 
-  debugEmail('findAmts', parsed.subject, matches, parsed, body)
+  //debugEmail('findAmts', parsed.subject, matches, parsed, body)
 }
 
 function findInvoiceNos(parsed, subject) {
@@ -86,7 +89,7 @@ function defaultTotal(parsed, body) {
 
   var allAmts = parsed.amts.concat(parsed.invoiceAmts)
 
-  debugEmail('defaultTotal invoked', allAmts, parsed)
+  //debugEmail('defaultTotal invoked', allAmts, parsed)
 
   if (allAmts.length == 1 && parsed.inEmail.length == 0) //Assume it's in an email attachment
     parsed.total = allAmts[0]
