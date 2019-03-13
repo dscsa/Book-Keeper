@@ -6,8 +6,11 @@ var amtRegEx = /\$?[\d,]*\d\.\d{2}(?!%)\b|\$[\d,]*\d\b/g //Make sure 33.33% is n
 function findTotal(parsed, body) {
   //Use the ending "(?! \d| \$)" to make sure "Fwd: 2017-11-13 Background Check One-Time GP 14.93 501c3 14.93 Total 29.86" match 29.86 and not 14.93.
   //"2019-03-11 Invoices 1654, 1655, 1647, 1688, 1537, 1637, 1661 , 1511, 1524, Marilyn Groves $5000 one-time, total $6345"
+  //Ex 2"Invoices 1691, 1598, 1642, 1684, 1656, 1673, 1633, 1671, 1653, 1613, 1681, 1690, 1604 TOTAL: $5110"
   var subject  = parsed.subject
-  var isTotal  = /(total:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?! \d| \$)/i
+  var isTotal = /(total:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?!:? \d|:? \$)/i
+
+  //Split into 2 regex because example 2, regex matches first occurance and we want the 2nd occurance
   var isMatch  = subject.match(isTotal) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
 
   if ( ! isMatch) {
