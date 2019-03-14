@@ -237,11 +237,17 @@ function processNewThread(thread) {
 }
 
 function searchTxns(parsed) {
-  if ( ! parsed.total || ! parsed.date) return []
+  
+  if ( ! parsed.total || ! parsed.date) {
+    var emptyTxns = []
+    emptyTxns.query = ''
+    return emptyTxns
+  }
+
   var expenses = (parsed.invoiceNos ? null : searchExpenses(parsed.total, parsed.date)) || []
   var deposits = searchDeposits(parsed.total, parsed.date) || []
   var txns = exactMatchesOrAll(expenses.concat(deposits))
-  txns.query = expenses.query || deposits.query //Concat gets rid of our secret query property
+  txns.query = expenses.query || deposits.query || '' //Concat gets rid of our secret query property
   return txns
 }
 
