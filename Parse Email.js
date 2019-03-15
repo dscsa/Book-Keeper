@@ -18,6 +18,7 @@ function findTotal(parsed, body) {
   var total = isMatch[2] || isMatch[3] //total will always be the 2nd or third capture group
   parsed.subject = subject.replace(isMatch[0], '') //replace totals so they don't get confused with amts later
   parsed.total  = cleanAmts([total])[0]
+  parsed.totalType = "specified"
   //debugEmail(subject, parsed.subject, isMatch, total, parsed)
 }
 
@@ -91,22 +92,41 @@ function defaultTotal(parsed, body) {
 
   var sumAmts = sum(allAmts)
 
+  debugEmail('defaultTotal', 'allAmts.length', allAmts.length, 'parsed.inEmail', parsed.inEmail, 'sumAmt', sum(allAmts), 'parsed', parsed, 'shortBody', shortBody, 'fullBody', body)
+
   //debugEmail('defaultTotal invoked', allAmts, parsed)
 
-  if (allAmts.length == 1 && parsed.inEmail.length == 0) //Assume it's in an email attachment
-    parsed.total = allAmts[0]
-
-  else if (allAmts.length == 1 && inOrSum(parsed, allAmts[0]))
-    parsed.total = allAmts[0] //if the one amt in subject is specified is in the email body then trust it.
-
-  else if (allAmts.length > 1 && inOrSum(parsed, sumAmts)) //several amts in smight but no total have been explicly sent in the subject
+  if (parsed.attachments) {
     parsed.total = sumAmts
+    parsed.totalType = "attachment"
+  }
 
-  else if (bodyTotal)
+  else if (allAmts.length == 1 && parsed.inEmail.length == 0) { //Assume it's in an email attachment
+    parsed.total = allAmts[0]
+    parsed.totalType = "single amt"
+  }
+
+  else if (allAmts.length == 1 && inOrSum(parsed.inEmail, allAmts[0])) {
+    parsed.total = allAmts[0] //if the one amt in subject is specified is in the email body then trust it.
+    parsed.totalType = "single amt matching email"
+  }
+
+  else if (allAmts.length > 1 && inOrSum(parsed.inEmail, sumAmts)) {//several amts in smight but no total have been explicly sent in the subject
+    parsed.total = sumAmts
+    parsed.totalType = "sum of amts matching email"
+  }
+
+  else if (bodyTotal) {
     parsed.total = bodyTotal[2] || bodyTotal[3]
+    if (allAmts.length == 0) parsed.amts.push(parsed.total)
+    parsed.totalType = "total in email"
+  }
 
-  else if (allAmts.length == 0) //otherwise if no amts and no total provided, assume the total is the max amt in the body
+  else if (allAmts.length == 0) { //otherwise if no amts and no total provided, assume the total is the max amt in the body
     parsed.total = Math.max.apply(null, parsed.inEmail)
+    parsed.amts.push(parsed.total)
+    parsed.totalType = "max amt in email"
+  }
 }
 
 //Remove $ and , in amts e.g. $26,000 -> 26000
@@ -118,9 +138,8 @@ function cleanPercents(percents) {
   return percents.map(function(percent) { return percent.slice(0, -1) })
 }
 
-function inOrSum(parsed, val) {
-  var inEmail = parsed.inEmail
-  return parsed.attachments || ~ inEmail.indexOf(val) || (val == sum(inEmail)) //we can't scan attachments so if there are some, then just assume the user's amt/total is correct.
+function inOrSum(inEmail, val) {
+  return ~ inEmail.indexOf(val) || (val == sum(inEmail)) //we can't scan attachments so if there are some, then just assume the user's amt/total is correct.
 }
 
 function sum(arr) {

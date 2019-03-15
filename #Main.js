@@ -237,7 +237,7 @@ function processNewThread(thread) {
 }
 
 function searchTxns(parsed) {
-  
+
   if ( ! parsed.total || ! parsed.date) {
     var emptyTxns = []
     emptyTxns.query = ''
@@ -355,12 +355,13 @@ function parseSubject(submitted, message) {
     submitted:submitted,
     date:null,
     errors:[],
-    invoiceNos:null,
-    invoiceAmts:null,
+    invoiceNos:[],
+    invoiceAmts:[],
     amts:[],
     percents:[],
-    inEmail:[],
     total:null,
+    totalType:null,
+    inEmail:[],
     attachments:message.getAttachments().length,
     programs:[],
     classes:[],
@@ -447,7 +448,7 @@ function getSheetLink(type, singular) {
 
 //Get rid of line breaks and indentation around arrays in order to save vertical space
 function prettyJson(obj) {
-  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"invoiceAmts"|"total"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"programs"|"classes"|"accounts"|"vendors"|"exact"|"from")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
+  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"invoiceAmts"|"total"|"totalType"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"programs"|"classes"|"accounts"|"vendors"|"exact"|"from")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
 }
 
 function addLabel(thread, label) {
