@@ -18,7 +18,7 @@ function findTotal(parsed, body) {
   var total = isMatch[2] || isMatch[3] //total will always be the 2nd or third capture group
   parsed.subject = subject.replace(isMatch[0], '') //replace totals so they don't get confused with amts later
   parsed.total  = cleanAmts([total])[0]
-  debugEmail(subject, parsed.subject, isMatch, total, parsed)
+  //debugEmail(subject, parsed.subject, isMatch, total, parsed)
 }
 
 function findPercents(parsed, body) {
