@@ -1,23 +1,17 @@
 
 
 //Used by amtRegEx and findAmts
-var amtRegEx = /\$?[\d,]*\d\.\d{2}(?!%)\b|\$[\d,]*\d\b/g //Make sure 33.33% is not registered as an amount
+//Test Case "Fwd: 2017-12-27 One-Time GLG $1000, Long Foundation $25,000, Cecilia Henig Individual $100, total $26,100"
+//Make sure 33.33% is not registered as an amount
+var amtRegEx = /-?\$?-?[\d,]*\d\.\d{2}(?!%)\b|-?\$-?[\d,]*\d\b/g
+var isTotal = /(\btotal:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?!:? \d|:? \$)/i
 
 function findTotal(parsed, body) {
   //Use the ending "(?! \d| \$)" to make sure "Fwd: 2017-11-13 Background Check One-Time GP 14.93 501c3 14.93 Total 29.86" match 29.86 and not 14.93.
   //"2019-03-11 Invoices 1654, 1655, 1647, 1688, 1537, 1637, 1661 , 1511, 1524, Marilyn Groves $5000 one-time, total $6345"
   //Ex 2"Invoices 1691, 1598, 1642, 1684, 1656, 1673, 1633, 1671, 1653, 1613, 1681, 1690, 1604 TOTAL: $5110"
   var subject  = parsed.subject
-  var isTotal = /(total:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?!:? \d|:? \$)/i
-
-  //Split into 2 regex because example 2, regex matches first occurance and we want the 2nd occurance
   var isMatch  = subject.match(isTotal) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
-
-  if ( ! isMatch) {
-    shortBody = body.split('- Forwarded message -')
-    shortBody = shortBody[0]+shortBody[1] //Don't include everything in forwarding chain since it might have lots of stuff
-    isMatch   = shortBody.match(isTotal)
-  }
 
   if ( ! isMatch) return
 
@@ -43,8 +37,6 @@ function findPercents(parsed, body) {
 }
 
 function findAmts(parsed, body) {
-  //Test Case "Fwd: 2017-12-27 One-Time GLG $1000, Long Foundation $25,000, Cecilia Henig Individual $100, total $26,100"
-  var amtRegEx = /-?\$?-?[\d,]*\d\.\d{2}|-?\$-?[\d,]*\d/g
 
   var matches  = parsed.subject.match(amtRegEx) || []
 
@@ -92,6 +84,13 @@ function defaultTotal(parsed, body) {
 
   var allAmts = parsed.amts.concat(parsed.invoiceAmts)
 
+  //Amt labeled total in the body of the email
+  var shortBody = body.split('- Forwarded message -')
+  shortBody = shortBody[0]+shortBody[1] //Don't include everything in forwarding chain since it might have lots of stuff
+  var bodyTotal = shortBody.match(isTotal)
+
+  var sumAmts = sum(allAmts)
+
   //debugEmail('defaultTotal invoked', allAmts, parsed)
 
   if (allAmts.length == 1 && parsed.inEmail.length == 0) //Assume it's in an email attachment
@@ -100,8 +99,11 @@ function defaultTotal(parsed, body) {
   else if (allAmts.length == 1 && inOrSum(parsed, allAmts[0]))
     parsed.total = allAmts[0] //if the one amt in subject is specified is in the email body then trust it.
 
-  else if (allAmts.length > 1 && inOrSum(parsed, sum(allAmts))) //several amts in smight but no total have been explicly sent in the subject
-    parsed.total = sum(allAmts)
+  else if (allAmts.length > 1 && inOrSum(parsed, sumAmts)) //several amts in smight but no total have been explicly sent in the subject
+    parsed.total = sumAmts
+
+  else if (bodyTotal)
+    parsed.total = bodyTotal[2] || bodyTotal[3]
 
   else if (allAmts.length == 0) //otherwise if no amts and no total provided, assume the total is the max amt in the body
     parsed.total = Math.max.apply(null, parsed.inEmail)
