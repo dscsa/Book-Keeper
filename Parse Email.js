@@ -13,13 +13,15 @@ function findTotal(parsed, body) {
   var subject  = parsed.subject
   var isMatch  = subject.match(isTotal) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
 
-  if ( ! isMatch) return
+  if (isMatch)
+    var total = cleanAmts([isMatch[2] || isMatch[3]])[0] //total will always be the 2nd or third capture group
 
-  var total = isMatch[2] || isMatch[3] //total will always be the 2nd or third capture group
+  if ( ! total) return
+
   parsed.subject = subject.replace(isMatch[0], '') //replace totals so they don't get confused with amts later
-  parsed.total  = cleanAmts([total])[0]
+  parsed.total   = total
   parsed.totalType = "specified"
-  //debugEmail(subject, parsed.subject, isMatch, total, parsed)
+  debugEmail(subject, parsed.subject, isMatch, total, parsed)
 }
 
 function findPercents(parsed, body) {
@@ -96,7 +98,7 @@ function defaultTotal(parsed, body) {
 
   //debugEmail('defaultTotal invoked', allAmts, parsed)
 
-  if (parsed.attachments) {
+  if (sumAmts && parsed.attachments) {
     parsed.total = sumAmts
     parsed.totalType = "attachment"
   }

@@ -392,20 +392,22 @@ function parseSubject(submitted, message) {
   if ( ! parsed.total)
     parsed.errors.push("Can you please specify the total for this receipt?")
 
+ //Default amt
+  if (parsed.total && ! parsed.invoiceAmts.length && ! parsed.amts.length)
+    parsed.amts.push(parsed.total)
+
   var invoiceSum = Math.abs(sum(parsed.invoiceAmts).toFixed(2))
   var amtSum     = Math.abs(sum(parsed.amts).toFixed(2))
   var total      = Math.abs((+parsed.total).toFixed(2))
   var emailSum   = Math.abs(sum(parsed.inEmail).toFixed(2))
 
-  //if (parsed.amts.length == 1 && parsed.amts[0] != parsed.total)
-  //  parsed.errors.push("Could you please add the specified amount to the body of the email and briefly explain why it is not present in the receipt?")
   if (invoiceSum + amtSum != total) { //Caused by 1) Amts don't add to a specified total, 2) percents don't add to 100%, 3) a mix of $s and %s
-    if (amtSum == emailSum) //Maybe the receipt is itemized but does not include a total
-      parsed.total = invoiceSum + emailSum
-    else if (invoiceSum)
+    if (invoiceSum)
       parsed.errors.push('Did you specify the correct amount and invoices because $'+total+' does not match '+parsed.amts.concat(parsed.invoiceAmts).join('+')+' = $'+(invoiceSum + amtSum)+'?')
-    else if (parsed.total) //don't duplicate the warning: "Can you please specify the total for this receipt?"
-      parsed.errors.push("Are you sure you the receipt amount(s) or percent(s) add up to the total?")
+    else if (total) //don't duplicate the warning: "Can you please specify the total for this receipt?"
+      parsed.errors.push("Are you sure you the receipt amount(s) or percent(s) add up to the total "+total+"?")
+    else
+      parsed.errors.push("Something went wrong and I need a better error message here")
   } else if ( ! parsed.invoiceNos) { //these are checked against amt.length so no point in checking if we know because of the prior condition that amt.length is likely wrong
     checkLength(parsed, 'programs')
     checkLength(parsed, 'classes')
