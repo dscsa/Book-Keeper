@@ -21,7 +21,7 @@ function findTotal(parsed, body) {
   parsed.subject = subject.replace(isMatch[0], '') //replace totals so they don't get confused with amts later
   parsed.total   = total
   parsed.totalType = "specified"
-  debugEmail(subject, parsed.subject, isMatch, total, parsed)
+  //debugEmail(subject, parsed.subject, isMatch, total, parsed)
 }
 
 function findPercents(parsed, body) {
