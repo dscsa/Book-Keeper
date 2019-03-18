@@ -244,7 +244,7 @@ function searchTxns(parsed) {
     return emptyTxns
   }
 
-  var expenses = (parsed.invoiceNos ? null : searchExpenses(parsed.total, parsed.date)) || []
+  var expenses = (parsed.invoiceNos.length ? null : searchExpenses(parsed.total, parsed.date)) || []
   var deposits = searchDeposits(parsed.total, parsed.date) || []
   var txns = exactMatchesOrAll(expenses.concat(deposits))
   txns.query = expenses.query || deposits.query || '' //Concat gets rid of our secret query property
