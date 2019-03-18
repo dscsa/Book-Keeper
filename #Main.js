@@ -128,7 +128,7 @@ function processPendingThread(thread, label) {
   if (now.getHours() == '10')
     debugEmail('processPendingThread', 'label', label, 'message.getSubject()', message.getSubject(), 'parsed', parsed, 'expenses', txns)
 
-  if (txns.length == 1 && parsed.invoiceNos)
+  if (txns.length == 1 && parsed.invoiceNos.length)
     return matchDeposit2Invoices(txns[0], parsed, thread, label)
 
   if (txns.length == 1 && validVendor(parsed, txns[0].id))
@@ -408,7 +408,7 @@ function parseSubject(submitted, message) {
       parsed.errors.push("Are you sure you the receipt amount(s) or percent(s) add up to the total "+total+"?")
     else
       parsed.errors.push("Something went wrong and I need a better error message here")
-  } else if ( ! parsed.invoiceNos) { //these are checked against amt.length so no point in checking if we know because of the prior condition that amt.length is likely wrong
+  } else if ( ! parsed.invoiceNos.length) { //these are checked against amt.length so no point in checking if we know because of the prior condition that amt.length is likely wrong
     checkLength(parsed, 'programs')
     checkLength(parsed, 'classes')
     checkLength(parsed, 'accounts')

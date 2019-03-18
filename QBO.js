@@ -327,24 +327,6 @@ function matchDeposit2Invoices(txn, parsed, thread, label) {
 //worth the full deposit amount and then set the deposit amount to 0
 function addInvoicePayment(txn, parsed) {
 
-  //For debugging
-  txn = txn || {
-    "id": "D12378",
-    "date": "2018-10-15",
-    "memo": "Paid Labs could not find a match for this deposit",
-    "amt": "175.00",
-    "exact": true,
-    "account": "Accounts Receivable:Uncategorized Deposits",
-    "bank": "Cash:SVB 501c3 6746"
-  }
-
-  //For debugging
-  parsed.invoiceNos = parsed.invoiceNos || [
-    "1643",
-    "1644",
-    "1645"
-  ]
-
   var service = getService();
 
   if ( ! service.hasAccess())
