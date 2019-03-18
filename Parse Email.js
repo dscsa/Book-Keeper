@@ -94,7 +94,7 @@ function defaultTotal(parsed, body) {
 
   var sumAmts = sum(allAmts)
 
-  debugEmail('defaultTotal', 'allAmts.length', allAmts.length, 'parsed.inEmail', parsed.inEmail, 'sumAmt', sum(allAmts), 'parsed', parsed, 'shortBody', shortBody, 'fullBody', body)
+  //debugEmail('defaultTotal', 'allAmts.length', allAmts.length, 'parsed.inEmail', parsed.inEmail, 'sumAmt', sum(allAmts), 'parsed', parsed, 'shortBody', shortBody, 'fullBody', body)
 
   //debugEmail('defaultTotal invoked', allAmts, parsed)
 
