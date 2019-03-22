@@ -61,7 +61,7 @@ function scanInbox() {
 
     var threads = GmailApp.search('in:inbox after:2018/03/22') //don't try to clear out historic backlog yet
 
-    Log('scanInbox', threads)
+    Log('scanInbox', threads.length, threads)
     for (var i in threads)
       processNewThread(threads[i])
 
@@ -80,6 +80,7 @@ function succesfulMatches() {
 
     var threads = GmailApp.search('label:The Book Keeper/Successful Match') //
 
+    Log('succesfulMatches', threads.length, threads)
     for (var i in threads)
       processPendingThread(threads[i], 'Successful Match')
 
@@ -98,7 +99,7 @@ function awaitingMatches() {
     var threads = GmailApp.search('label:The Book Keeper/Awaiting Match')
 
     //debugEmail('Awaiting Matches', threads.length)
-
+    Log('awaitingMatches', threads.length, threads)
     for (var i in threads)
       processPendingThread(threads[i], 'Awaiting Match')
 
