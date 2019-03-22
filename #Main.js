@@ -170,9 +170,9 @@ function processNewThread(thread) {
   var plainBody = message.getPlainBody()
   var toAddress = message.getTo()
 
-  //debugEmail('processNewThread', 'thread.getFirstMessageSubject()', thread.getFirstMessageSubject(), 'message.getTo()', message.getTo(), 'subject', subject, 'plainBody', plainBody, 'cancel', parseBody(subject, plainBody, /(^|[^"])\bcancel\b($|[^"])/i), 'TxnId', parseBody(subject, plainBody, /.{0,50}\b(\d{5})\b/), "hasLabel(thread, 'Multiple Matches')", hasLabel(thread, 'Multiple Matches'), 'thread.getLabels()', thread.getLabels())
+  //debugEmail('processNewThread', 'thread.getFirstMessageSubject()', thread.getFirstMessageSubject(), 'message.getTo()', message.getTo(), 'subject', subject, 'plainBody', plainBody, 'cancel', parseBody(plainBody, /(^|[^"])\bcancel\b($|[^"])/i), 'TxnId', parseBody(plainBody, /.{0,50}\b(\d{5})\b/), "hasLabel(thread, 'Multiple Matches')", hasLabel(thread, 'Multiple Matches'), 'thread.getLabels()', thread.getLabels())
 
-  if (parseBody(subject, plainBody, /(^|[^"])\bcancel\b($|[^"])/i)) {
+  if (parseBody(plainBody, /(^|[^"])\bcancel\b($|[^"])/i)) {
     removeLabel(thread, 'Multiple Matches')
     removeLabel(thread, 'Awaiting Match')
     removeLabel(thread, 'Successful Match')
@@ -183,7 +183,7 @@ function processNewThread(thread) {
   var parsed = parseSubject(subject, message)
 
   //Someone responded with the ID of the matching expense.  Need to check after "cancel" since ID might be in quoted text below
-  var txnId = parseBody(subject, plainBody, /(^|[^"])\b([DdEeCc]\d{4,5})\b($|[^"])/)
+  var txnId = parseBody(plainBody, /(^|[^"])\b([DdEeCc]\d{4,5})\b($|[^"])/)
   if (txnId && validVendor(parsed, txnId) && hasLabel(thread, 'Multiple Matches')) {
     addToQBO(txnId[2], parsed, thread, 'Multiple Matches')
     return reply(message, 'Thanks for letting me know! I just added it to QuickBooks<br>')
@@ -327,8 +327,8 @@ function parseTo(message) {
   return submitted
 }
 
-function parseBody(subject, body, regex) {
-  return subject.slice(0, 3) == 'Re:' && body.match(regex)
+function parseBody(body, regex) {
+  return ~ body.indexOf('receipts@sirum.org') && body.match(regex)
 }
 
 function testParseSubject() {
