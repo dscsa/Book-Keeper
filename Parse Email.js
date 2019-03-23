@@ -18,8 +18,8 @@ function findTotal(parsed, body) {
 
   if ( ! total) return
 
-  parsed.subject = subject.replace(isMatch[0], '') //replace totals so they don't get confused with amts later
-  parsed.total   = total
+  parsed.subject   = subject.replace(isMatch[0], '') //replace totals so they don't get confused with amts later
+  parsed.total     = +total
   parsed.totalType = "specified"
   //debugEmail(subject, parsed.subject, isMatch, total, parsed)
 }
@@ -35,8 +35,11 @@ function findPercents(parsed, body) {
 
   parsed.percents = cleanPercents(matches)
 
-  if (parsed.amts.length < 2) //don't allow mixing of %s and $s right now.  Need way to preserve order if we mix.  Note default of 100% should fill in an empty amt if there is a total available
-    parsed.amts = parsed.percents.map(function(percent) { return percent*parsed.total/100 })
+  if (parsed.amts.length < 2) {//don't allow mixing of %s and $s right now.  Need way to preserve order if we mix.  Note default of 100% should fill in an empty amt if there is a total available
+    parsed.amts = parsed.percents.map(function(percent) { return +(parsed.total*percent/100).toFixed(2) })
+    var sumAmts = sum(parsed.amts)
+    if (sumAmts != parsed.total) parsed.amts[0] = +(+parsed.total - sumAmts + parsed.amts[0]).toFixed(2) //Fix Partial Cent Rounding Issues
+  }
 }
 
 function findAmts(parsed, body) {
