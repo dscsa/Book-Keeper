@@ -113,7 +113,7 @@ function defaultTotal(parsed, body) {
 
   else if (allAmts.length == 1 && inOrSum(parsed.inEmail, allAmts[0])) {
     parsed.total = allAmts[0] //if the one amt in subject is specified is in the email body then trust it.
-    parsed.totalType = "single amt matching email"
+    parsed.totalType = "single amt matching email amt or total"
   }
 
   else if (allAmts.length > 1 && inOrSum(parsed.inEmail, sumAmts)) {//several amts in smight but no total have been explicly sent in the subject
