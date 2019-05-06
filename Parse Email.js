@@ -222,7 +222,7 @@ function findMatches(parsed, list, full, prefix){
 
     var match = (parsed.subject || parsed).match(regex) //make it work for email bodies as well
     if(match) {
-      debugEmail(parsed.subject, 'i', i, 'list[i]', list[i], "lookup.join('')", lookup.join(''), 'full[i]', full[i], 'list.length', list.length, 'full.length', full.length, 'list', list, 'full', full)
+      //debugEmail(parsed.subject, 'i', i, 'list[i]', list[i], "lookup.join('')", lookup.join(''), 'full[i]', full[i], 'list.length', list.length, 'full.length', full.length, 'list', list, 'full', full)
       matches.push({index:match.index, match:full[i]})
       i = i - replaceMatch(regex, match, parsed) //remove this match and repeat search again instead of a /g global regex flag which gets rid of the index
     }
