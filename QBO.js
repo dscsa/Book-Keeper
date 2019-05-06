@@ -148,7 +148,7 @@ function searchExpenses(amt, date, account){
   var lowAmt  = +amt - 1
   var highAmt = +amt + 1
 
-  var account = account || "Uncategorized Expense"
+  var account = account || "9999 Uncategorized:Uncategorized - Expenses"
   var expenses = []
 
   expenses.query = "SELECT * FROM Purchase WHERE TotalAmt > '"+lowAmt.toFixed(2)+"' and TotalAmt < '"+highAmt.toFixed(2)+"' and TxnDate > '" + startDate.toJSON().slice(0, 10) + "' and TxnDate < '" + endDate.toJSON().slice(0, 10) + "'"
