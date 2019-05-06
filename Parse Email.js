@@ -222,7 +222,7 @@ function findMatches(parsed, list, full, prefix){
 
     var match = (parsed.subject || parsed).match(regex) //make it work for email bodies as well
     if(match) {
-      //debugEmail(parsed.subject, 'list[i]', list[i], "lookup.join('')", lookup.join(''), 'full[i]', full[i])
+      debugEmail(parsed.subject, 'i', i, 'list[i]', list[i], "lookup.join('')", lookup.join(''), 'full[i]', full[i], 'list.length', list.length, 'full.length', full.length, 'list', list, 'full', full)
       matches.push({index:match.index, match:full[i]})
       i = i - replaceMatch(regex, match, parsed) //remove this match and repeat search again instead of a /g global regex flag which gets rid of the index
     }
@@ -301,20 +301,3 @@ function fillDefaults(toFill, length) {
 
   return toFill
 }
-
-/*
-function findAmts(parsed, body) {
-  //Test Case "Fwd: 2017-12-27 One-Time GLG $1000, Long Foundation $25,000, Cecilia Henig Individual $100, total $26,100"
-  var subject  = parsed.subject.replace(/(total|=) \$?[\d,.]*\d|\$?[\d,.]*\d total/i, '') //remove totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
-  var matches  = cleanAmts(subject.match(amtRegEx) || [])
-
-  if (matches.length) {
-    parsed.amts = parsed.amts.concat(matches)
-    parsed.total = parsed.amts.reduce(function(sum, amt) { return +amt+sum }, 0)
-  } else { //if amts not in the subject then parse the email body for the max value.
-    //Only Searching BEFORE "We hope to see you again soon." Avoids getting higher prices for "Buy It Again", "Bargain Recommendations", and "Customers who bought ... also bought"
-    body = body.split(/We hope to see you again soon|Buy It Again|Bargain Recommendations|Customers who bought/i)[0]
-    parsed.total = Math.max.apply(null, cleanAmts(body.match(amtRegEx) || []))
-    if (parsed.total) parsed.amts = [parsed.total]
-  }
-}*/
