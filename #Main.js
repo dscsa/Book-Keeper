@@ -356,7 +356,7 @@ function testParseSubject() {
 function parseSubject(submitted, message) {
 
   submitted   = submitted.trim()
-  var body    = message.getPlainBody()
+  var body    = message.getPlainBody ? message.getPlainBody() : message
   var subject = removeComments(submitted.trim())
   var name    = getName(message)
   var parsed  = { //Preserve ordering

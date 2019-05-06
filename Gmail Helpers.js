@@ -84,7 +84,7 @@ function getName(message) {
 //X-Forwarded-For is used by gmail forwarding, not sure if its a universal standard though
 //Example https://mail.google.com/mail/u/0?ik=dc59420667&view=om&permmsgid=msg-f%3A1614438721172240768
 function getForward(message) {
-  var match = message.getRawContent().match(/^X-Forwarded-For:\s*([^\s]+)\s*([^\s]+)/mi)
+  var match = message.getRawContent ? message.getRawContent().match(/^X-Forwarded-For:\s*([^\s]+)\s*([^\s]+)/mi) : message
   return match ? match.slice(1, 3) : []
 }
 
