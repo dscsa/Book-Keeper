@@ -398,8 +398,6 @@ function parseSubject(submitted, message) {
   if ( ! parsed.total)
     parsed.errors.push("Can you please specify the total for this receipt?")
 
-  for (var)
-
  //Default amt
   if (parsed.total && ! parsed.invoiceAmts.length && ! parsed.amts.length)
     parsed.amts.push(parsed.total)
