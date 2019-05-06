@@ -596,7 +596,7 @@ function getClassRefs(programs, classes){
 
   //If Class starts with 0 Program then we append Entity
   classes = classes.map(function(class, i) {
-    return class[0] === '0' ? class+':'+programs[i] : class
+    return class.slice(0, 3) === '100' ? class+':'+programs[i] : class
   })
 
   var service = getService();

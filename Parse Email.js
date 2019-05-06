@@ -168,30 +168,24 @@ function findInvoices(parsed) {
 }*/
 
 function findPrograms(parsed, programs) {
-  var shortPrograms = pullDataFromColumn(0,programs)
-  var fullPrograms = pullDataFromColumn(1,programs)
+  var shortPrograms = pullDataFromColumn(1,programs)
+  var fullPrograms = pullDataFromColumn(0,programs)
   var matches = findMatches(parsed, shortPrograms, fullPrograms)
   parsed.programs = matches.length ? matches : ['501c3'] //default value
 }
 
 function findClasses(parsed, classes) {
-  var shortClasses = pullDataFromColumn(0,classes)
-  var fullClasses = pullDataFromColumn(1,classes)
+  var shortClasses = pullDataFromColumn(1,classes)
+  var fullClasses = pullDataFromColumn(0,classes)
   parsed.classes = findMatches(parsed, shortClasses, fullClasses)
 
   //Allow a default value only for certain non-split deposits
   if (parsed.classes.length || parsed.accounts.length != 1) return
-
-  if ( ~ parsed.accounts[0].indexOf('Contributions & Grants'))
-    parsed.classes = ['One-Time'] //We consider grants one-time since we want to exlcude them from our financial sustainability calculations
-
-  if ( ~ parsed.accounts[0].indexOf('Program Service Revenue'))
-    parsed.classes = ['On-Going'] //We consider earned income on-going since we do want to inlcude them in our financial sustainability calculations
 }
 
 function findVendors(parsed, vendors, body) {
-  var shortVendors = pullDataFromColumn(0,vendors)
-  var fullVendors = pullDataFromColumn(1,vendors)
+  var shortVendors = pullDataFromColumn(1,vendors)
+  var fullVendors = pullDataFromColumn(0,vendors)
 
   Logger.log(['findVendors before subject match'])
 
@@ -208,8 +202,8 @@ function findVendors(parsed, vendors, body) {
 
 
 function findAccounts(parsed, accounts) {
-  var shortAccounts = pullDataFromColumn(0,accounts)
-  var fullAccounts = pullDataFromColumn(1,accounts)
+  var shortAccounts = pullDataFromColumn(3,accounts)
+  var fullAccounts = pullDataFromColumn(2,accounts)
   parsed.accounts = findMatches(parsed, shortAccounts, fullAccounts, '(\\b[a-zA-Z][a-zA-Z& ]+:)?') // capture (and remove) meta expense category if present.
 }
 

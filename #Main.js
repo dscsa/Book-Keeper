@@ -334,16 +334,23 @@ function parseBody(body, regex) {
 
 function testParseSubject() {
   importCategories()
-  //var parsed = parseSubject("2018-05-01 One-time 501c3 Rent Rent Rent 50% 50%", "")
-  //var parsed = parseSubject("2018-04-19 Good Pill Operations Pharmacist $602.00 $504.00 (James and Junushi)", "")
-  //2018-05-02 SIRUM CA:Operations $14.89 split SIRUM US:Operations $14.89, Office:Supplies, Amazon Tape $29.77 total
-  //var parsed = parseSubject("2018-06-05 501c3 Investment Fees Ongoing $140 (Human Interest)", "")
-  //var parsed = parseSubject("Re: 2018-06-28 Fundraising Fees 501c3 Fundraising Check #90019 $1000 (Windfall Data Subscription)", "")
-  //var toParse = "2018-07-12 Operations, Office Supplies, SIRUM US $62.14, SIRUM CA $62.14, Amazon total: $124.28"
-  //var toParse = "Re: 2018-07-12 Operations, Office Supplies, SIRUM US 50%, SIRUM CA 50%, Amazon total: $124.28"
-  var toParse = "Re: 2018-07-12 Ragini Operations, Office Supplies, SIRUM US 50%, SIRUM CA 50%, Amazon total: $124.28"
+
+  var toParse = [
+    "2018-05-01 One-time 501c3 Rent Rent Rent 50% 50%",
+    "2018-04-19 Good Pill Operations Pharmacist $602.00 $504.00 (James and Junushi)",
+    "2018-05-02 SIRUM CA $14.89 split SIRUM US:Operations $14.89, Office:Supplies, Amazon Tape $29.77 total",
+    "2018-06-05 501c3 Investment Fees Ongoing $140 (Human Interest)",
+    "Re: 2018-06-28 Fundraising Fees 501c3 Fundraising Check #90019 $1000 (Windfall Data Subscription)",
+    "2018-07-12 Office Supplies, SIRUM US $62.14, SIRUM CA $62.14, Amazon total: $124.28",
+    "Re: 2018-07-12 Operations, Office Supplies, SIRUM US 50%, SIRUM CA 50%, Amazon total: $124.28",
+    "Re: 2018-07-12 Ragini Office Supplies, SIRUM US 50%, SIRUM CA 50%, Amazon total: $124.28"
+  ]
+
+  var parsed = toParse.map(function(subject) {
+    return {subject:subject, parsed:parseSubject(subject, "")}
+  })
   //var expenses = searchExpenses(parsed.total, parsed.date)
-  debugEmail('testParseSubject', parseSubject(toParse, ""))
+  debugEmail('testParseSubject', parsed)
 }
 
 function parseSubject(submitted, message) {
