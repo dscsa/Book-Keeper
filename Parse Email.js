@@ -167,20 +167,10 @@ function findInvoices(parsed) {
 
 }*/
 
-function findPrograms(parsed, programs) {
-  var shortPrograms = pullDataFromColumn(1,programs)
-  var fullPrograms = pullDataFromColumn(0,programs)
-  var matches = findMatches(parsed, shortPrograms, fullPrograms)
-  parsed.programs = matches.length ? matches : ['501c3'] //default value
-}
-
 function findClasses(parsed, classes) {
   var shortClasses = pullDataFromColumn(1,classes)
   var fullClasses = pullDataFromColumn(0,classes)
   parsed.classes = findMatches(parsed, shortClasses, fullClasses)
-
-  //Allow a default value only for certain non-split deposits
-  if (parsed.classes.length || parsed.accounts.length != 1) return
 }
 
 function findVendors(parsed, vendors, body) {
@@ -214,6 +204,9 @@ function findMatches(parsed, list, full, prefix){
 
   var matches = []
   for(var i = 0; i < list.length; i++){
+
+    if ( ! list[i]) continue
+
     var lookup = [
       prefix || '',
       '\\b',                                   // force start of word (no prefixes)
@@ -221,7 +214,12 @@ function findMatches(parsed, list, full, prefix){
       '\\w*'                                   // allow for suffixes e.g. Registration(s)?
     ]
 
-    var regex = new RegExp(lookup.join(''), 'i')
+    try {
+      var regex = new RegExp(lookup.join(''), 'i')
+    } catch (e) {
+      throw 'Invalid RegEx: '+lookup.join('')+' '+e.message
+    }
+
     var match = (parsed.subject || parsed).match(regex) //make it work for email bodies as well
     if(match) {
       //debugEmail(parsed.subject, 'list[i]', list[i], "lookup.join('')", lookup.join(''), 'full[i]', full[i])

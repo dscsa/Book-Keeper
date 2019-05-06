@@ -36,28 +36,6 @@ function testNewRecent() {
   Log(expenses.query, res.QueryResponse.Deposit.length, res.QueryResponse.Deposit.map(function(expense) { return expense.Line[0].DepositLineDetail.AccountRef.name }))
 }
 
-function testClassify() {
-  //https://qbo.intuit.com/app/expense?txnId=10021
-  /*classifyExpense(10021, {
-    amts:['50', '100', '150'],
-    classes:['0 Program:On-Going', '0 Program:One-Time', '3 Lobbying'],
-    programs:['501c3', 'Charitable Returns', 'SIRUM US'],
-    accounts:['Accounting:Accounting, Auditing, & Tax', 'Other Service Fees:Destruction', 'Office:Banking & Investment Fees'],
-    submitted:"This is Adam's user submitted line"
-  })*/
-
-  //https://qbo.intuit.com/app/expense?txnId=10021
-  classifyTxn('E10021', {
-    total:300,
-    amts:['300'],
-    classes:['0 Program:One-Time'],
-    programs:['SIRUM US'],
-    accounts:['Office:Registrations & Fees'],
-    submitted:'Point Of Sale Withdrawal 7000202 Point Of Sale Withdrawal 700020201 DELAWARE DIV OF COR'
-    //Point Of Sale Withdrawal 7000202 Point Of Sale Withdrawal 700020201 DELAWARE DIV OF COR
-  })
-}
-
 function lastYearsExpenses() {
   return getRecentExpenses(365)
 }
@@ -252,7 +230,6 @@ function searchDeposits(amt, date, account){
   return exactMatchesOrAll(deposits)
 }
 
-//2018-10-09     $75.00 deposit, Cash:SVB 501c3 6746, Paid Labs could not find a match for this deposit | | {"DepositToAccountRef":{"value":"465","name":"Cash:SVB 501c3 6746"},"TotalAmt":75,"domain":"QBO","sparse":false,"Id":"12380","SyncToken":"1","MetaData":{"CreateTime":"2018-10-22T15:21:15-07:00","LastUpdatedTime":"2018-12-21T22:04:47-08:00"},"TxnDate":"2018-10-09","CurrencyRef":{"value":"USD","name":"United States Dollar"},"PrivateNote":"Paid Labs could not find a match for this deposit","Line":[{"Id":"1","LineNum":1,"Description":"Paid Labs could not find a match for this deposit","Amount":75,"DetailType":"DepositLineDetail","DepositLineDetail":{"Entity":{"value":"416","name":"1 Donor Unrestricted:Unrestricted Internally","type":"CUSTOMER"},"ClassRef":{"value":"3000000000000889887","name":"0 Program:On-Going:501c3"},"AccountRef":{"value":"432","name":"Accounts Receivable:Uncategorized Deposits"}}}]}
 function getPayment(Id) {
 
   Id = Id || 12781
@@ -455,8 +432,7 @@ function addToQBO(id, parsed, thread, label) {
 // {
 //  "submitted":<The orginial user supplied string>,
 //  "date":YYYY-MM-DD,
-//  "programs":["US", "CA"],
-//  "classes":["On-Going", "One-Time"],
+//  "classes":["SIRUM US", "Charitable Returns"],
 //  "accounts":["Rx:Shipping", "Organizations"],
 //  "amounts":[6.5, 7.3]
 // }
@@ -471,7 +447,7 @@ function classifyTxn(id, parsed){
   var AccountRefs  = getAccountRefs(parsed.accounts)
   var CustomerRefs = getCustomerRefs(id, parsed.classes)
   var VendorRefs   = getVendorRefs(parsed.vendors)
-  var ClassRefs    = getClassRefs(parsed.programs, parsed.classes)
+  var ClassRefs    = getClassRefs(parsed.classes)
 
   if ( ! AccountRefs || ! CustomerRefs || ! ClassRefs)
     return debugEmail('Aborting classifyExpense because missing Refs', AccountRefs, CustomerRefs, ClassRefs, parsed)
@@ -592,12 +568,7 @@ function uploadPDF(id, blob){
     throw ["Error: There was an error is your attachment", body, res]
 }
 
-function getClassRefs(programs, classes){
-
-  //If Class starts with 0 Program then we append Entity
-  classes = classes.map(function(class, i) {
-    return class.slice(0, 3) === '100' ? class+':'+programs[i] : class
-  })
+function getClassRefs(classes){
 
   var service = getService();
 

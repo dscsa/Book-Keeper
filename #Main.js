@@ -300,8 +300,7 @@ function successfulMatch(message, parsed, txns, thread) {
 //  "errors":[],
 //  "date":YYYY-MM-DD,
 //  "total":13.80,
-//  "programs":["US", "CA"],
-//  "classes":["On-Going", "One-Time"],
+//  "classes":["SIRUM US", "SIRUM CA"],
 //  "accounts":["Rx:Shipping", "Organizations"],
 //  "amts":[6.50, 7.30],
 // }
@@ -337,6 +336,7 @@ function testParseSubject() {
 
   var toParse = [
     "2018-05-01 One-time 501c3 Rent Rent Rent 50% 50%",
+    "2018-04-29 Good Pill Fundraising $602.00 (Kiah)",
     "2018-04-19 Good Pill Operations Pharmacist $602.00 $504.00 (James and Junushi)",
     "2018-05-02 SIRUM CA $14.89 split SIRUM US:Operations $14.89, Office:Supplies, Amazon Tape $29.77 total",
     "2018-06-05 501c3 Investment Fees Ongoing $140 (Human Interest)",
@@ -370,8 +370,7 @@ function parseSubject(submitted, message) {
     total:null,
     totalType:null,
     inEmail:[],
-    attachments:message.getAttachments().length,
-    programs:[],
+    attachments:message.getAttachments ? message.getAttachments().length : 0,
     classes:[],
     accounts:[],
     vendors:[],
@@ -390,7 +389,6 @@ function parseSubject(submitted, message) {
   findPercents(parsed, body)
 
   findVendors(parsed, vendors, body)
-  findPrograms(parsed, programs)
   findClasses(parsed, classes)
   findAccounts(parsed, accounts) //Do this last because it's the most greedy regex and can inadvertently mess up the others
 
@@ -399,6 +397,8 @@ function parseSubject(submitted, message) {
 
   if ( ! parsed.total)
     parsed.errors.push("Can you please specify the total for this receipt?")
+
+  for (var)
 
  //Default amt
   if (parsed.total && ! parsed.invoiceAmts.length && ! parsed.amts.length)
@@ -414,10 +414,8 @@ function parseSubject(submitted, message) {
       parsed.errors.push('Did you specify the correct amount and invoices because $'+total+' does not match '+parsed.amts.concat(parsed.invoiceAmts).join('+')+' = $'+(invoiceSum + amtSum)+'?')
     else if (total) //don't duplicate the warning: "Can you please specify the total for this receipt?"
       parsed.errors.push("Are you sure you the receipt amount(s) or percent(s) add up to the total "+total+"?")
-    else
-      parsed.errors.push("Something went wrong and I need a better error message here")
+
   } else if ( ! parsed.invoiceNos.length) { //these are checked against amt.length so no point in checking if we know because of the prior condition that amt.length is likely wrong
-    checkLength(parsed, 'programs')
     checkLength(parsed, 'classes')
     checkLength(parsed, 'accounts')
   }
@@ -448,7 +446,7 @@ function checkLength(parsed, type) {
 }
 
 function getSheetLink(type, singular) {
-  var gid = {instructions:931274598, classes:2063886151, programs:683783800, vendors:1847271979, accounts:0}[type]
+  var gid = {instructions:931274598, classes:2063886151, vendors:1847271979, accounts:0}[type]
 
   if (singular != null) //Undefined/Null leaves alone, TRUE converts to singular, FALSE converts to ambivalent e.g. program(es)
     type = type.replace(/(e?s)$/, singular ? '' : '($1)')
@@ -458,7 +456,7 @@ function getSheetLink(type, singular) {
 
 //Get rid of line breaks and indentation around arrays in order to save vertical space
 function prettyJson(obj) {
-  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"invoiceAmts"|"total"|"totalType"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"programs"|"classes"|"accounts"|"vendors"|"exact"|"from")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
+  return JSON.stringify(obj).replace(/("id"|"memo"|"invoiceNos"|"invoiceAmts"|"total"|"totalType"|"amt"|"bank"|"account"|"submitted"|"attachments"|"date"|"amts"|"inEmail"|"percents"|"classes"|"accounts"|"vendors"|"exact"|"from")/g, '\n  $1').replace(/}/g, '\n}')  //.replace(/\[\n */g, '[ ').replace(/\n *\]/g, ' ]').replace(/([^\]],)\n */g, '$1')
 }
 
 function addLabel(thread, label) {
@@ -510,13 +508,11 @@ function debugSearch(threads) {
   debugEmail('debugSearch', 'subjects', subjects)
 }
 
-var programs
 var classes
 var accounts
 var vendors
 function importCategories() {
   var ss = SpreadsheetApp.openById('1klEQQ7u73D8y1UdPLu2C3xChQ1ZlLfEpGfhACe9WNXQ')
-  programs = ss.getSheetByName("Programs").getDataRange().getValues()
   classes  = ss.getSheetByName("Classes").getDataRange().getValues()
   accounts = ss.getSheetByName("Accounts").getDataRange().getValues()
   vendors  = ss.getSheetByName("Vendors").getDataRange().getValues()
