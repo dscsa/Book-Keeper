@@ -104,7 +104,7 @@ function getRecentDeposits(days){
     var deposit = res.QueryResponse.Deposit[i]
     //Couldn't figure out how to do include account in query's WHERE, so filter the results here instead
     //First Part (before the ||) is for Quickbooks Credit Card Payments of Invoices.  They don't have an AccountRef but do have a linked transaction
-    if (isUncategorizedDeposit(deposit, "Accounts Receivable:Uncategorized Deposits"))
+    if (isUncategorizedDeposit(deposit, "6999 Uncategorized Deposits"))
       deposits.push({
         id:getTxnId(deposit),
         date:deposit.TxnDate,
@@ -185,7 +185,7 @@ function searchExpenses(amt, date, account){
 
 function searchDeposits(amt, date, account){
 
-  account = account || "Accounts Receivable:Uncategorized Deposits"
+  account = account || "6999 Uncategorized Deposits"
 
   var service = getService();
 
