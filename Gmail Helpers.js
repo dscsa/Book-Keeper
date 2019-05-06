@@ -8,13 +8,13 @@
 function getDate(message) {
 
   var to = getTo(message)
-  var subject = message.getSubject()
+  var subject = message.getSubject ? message.getSubject() : message
 
   return getYYYYMMDD(to)
     || getMMDDYYYY(to)
     || getYYYYMMDD(subject)
     || getMMDDYYYY(subject)
-    || getForwardedDate(message.getBody())
+    || getForwardedDate(message.getBody ? message.getBody() : message)
     || getSentDate(message)
 }
 
@@ -54,15 +54,15 @@ function getForwardedDate(string) {
 }
 
 function getSentDate(message) {
-  return message.getDate().toJSON().slice(0, 10)
+  return message.getDate ? message.getDate().toJSON().slice(0, 10) : new Date()
 }
 
 function getTo(message) {
-  return getForward(message)[1] || message.getTo()
+  return getForward(message)[1] || (message.getTo ? message.getTo() : message)
 }
 
 function getFrom(message) {
-  return getForward(message)[0] || message.getFrom()
+  return getForward(message)[0] || (message.getFrom ? message.getFrom() : message)
 }
 
 function getName(message) {
@@ -142,33 +142,4 @@ function getMonth(date) {
 
     if ( ~ date.indexOf('Dec'))
       return '12'
-}
-
- function findDateOLD(parsed, body) {
-  var matchYYYYMMDD  = parsed.subject.match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2}),? /)
-  var matchMMDDYYYY  = parsed.subject.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4}),? /)
-  var matchEmailDate = body.match(/Date:(.*)/i) //Date will be in body if manually forwared or will be in subject if put there by parseTo for an autoforwared email
-
-  if (matchYYYYMMDD) {
-    //Logger.log(['matchYYYYMMDD', matchYYYYMMDD])
-    parsed.date = matchYYYYMMDD[1]+'-'+('0'+matchYYYYMMDD[2]).slice(-2)+'-'+('0'+matchYYYYMMDD[3]).slice(-2)
-    parsed.subject = parsed.subject.replace(matchYYYYMMDD[0], '')
-  }
-  else if (matchMMDDYYYY) {
-    //Logger.log(['matchMMDDYYYY', matchMMDDYYYY])
-    parsed.date = matchMMDDYYYY[3]+'-'+('0'+matchMMDDYYYY[1]).slice(-2)+'-'+('0'+matchMMDDYYYY[2]).slice(-2)
-    parsed.subject = parsed.subject.replace(matchMMDDYYYY[0], '')
-  } else if (matchEmailDate) { //Parse body, looking for a forwarded email's sent date
-    //Mon, Apr 2, 2018 at 1:06 PM
-    //April 11, 2018 at 9:42:37 PM EDT
-    //Tue, Apr 3, 2018 at 2:31 PM
-    //Fri, Apr 6, 2018 at 3:06 PM
-    //Thu, Mar 15, 2018 at 1:20 PM
-    //Wed, Apr 4, 2018 at 12:41 AM
-    //April 23, 2018 at 12:57:27 AM EDT
-    var year  = matchEmailDate[1].match(/\b\d{4}\b/)
-    var day   = matchEmailDate[1].match(/\b\d{1,2}\b/)
-    var month = getMonth(matchEmailDate[1])
-    parsed.date = year+'-'+month+'-'+('0'+day).slice(-2)
-  }
 }
