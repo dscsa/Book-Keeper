@@ -245,8 +245,7 @@ function replaceMatch(regex, match, parsed) {
 function pullDataFromColumn(col,data){
   var res = []
   for(var i = 1; i < data.length;i++){
-    var text = data[i][col].toString()
-    if(text.length > 0) res.push(text)
+    res.push(data[i][col].toString())
   }
   return res
 }
