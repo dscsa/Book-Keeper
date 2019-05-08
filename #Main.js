@@ -139,20 +139,23 @@ function processPendingThread(thread, label) {
   delete parsed.errors
   delete parsed.subject
 
+  removeLabel(thread, label)
+
   if (txns.length == 1) {
-    removeLabel(thread, label)
-    reply(message, error+'<br><br>This is how I understand your receipt:<br><pre>'+prettyJson(parsed)+'</pre>I found the matching expense/deposit below but can only add it if you resend me the receipt with exactly one vendor:<br><pre>'+prettyJson(txns)+'</pre>')
     //debugEmail('parsed.errors.length', 'subject', subject, 'parsed', parsed, 'message.getFrom()', message.getFrom())
+    reply(message, error+'<br><br>This is how I understand your receipt:<br><pre>'+prettyJson(parsed)+'</pre>I found the matching expense/deposit below but can only add it if you resend me the receipt with exactly one vendor:<br><pre>'+prettyJson(txns)+'</pre>')
     return addLabel(thread, 'Parse Error')
   }
 
-  if (txns.length > 1) {
-    multipleMatches(message, parsed, txns, thread)
-    return removeLabel(thread, label)
-  }
+  if (txns.length > 1)
+    return multipleMatches(message, parsed, txns, thread)
 
-  //if (txns.length < 1)
-  removeLabel(thread, label)
+  var endDate   = new Date(parsed.date)
+  endDate.setDate(endDate.getDate()+5+7)
+
+  if (endDate <= new Date())
+    return noMatchesStopLooking(message, parsed, txns, thread)
+
   addLabel(thread, 'Awaiting Match')
 
   if (label == 'Awaiting Match' && (now.getDate() != 'Monday' || now.getHours() != '10')) return //Check Awaiting Match every hour but only Email on Mondays at 10am
@@ -261,7 +264,7 @@ function noMatchesStopLooking(message, parsed, txns, thread) {
   removeLabel(thread, 'Multiple Matches')
   removeLabel(thread, 'Awaiting Match')
   removeLabel(thread, 'Successful Match')
-  reply(message, 'Thanks for submitting your receipt. Unfortunately, I could not find a matching expense/deposit with '+txns.query.split('WHERE')[1]+'. Please check the date and amount of your receipt below and resubmit:<br><pre>'+prettyJson(parsed)+'</pre>')
+  reply(message, 'Thanks for submitting your receipt. Unfortunately, I could not find a matching expense/deposit with '+txns.query.split('WHERE')[1]+'. If necessary, please check the date and amount of your receipt below and resubmit:<br><pre>'+prettyJson(parsed)+'</pre>')
   addLabel(thread, 'No Matches')
 }
 
