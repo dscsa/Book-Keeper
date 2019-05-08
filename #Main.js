@@ -135,6 +135,7 @@ function processPendingThread(thread, label) {
   if (txns.length == 1 && validVendor(parsed, txns[0].id))
     return addToQBO(txns[0].id, parsed, thread, label)
 
+  //Don't display these fields to the user
   var error = parsed.errors[0]
   delete parsed.errors
   delete parsed.subject

@@ -54,7 +54,16 @@ function findAmts(parsed, body) {
 function findInvoiceNos(parsed, subject) {
   //Errant space after 1661: "2019-03-11 Invoices 1654, 1655, 1647, 1688, 1537, 1637, 1661 , 1511, 1524, Marilyn Groves $5000 one-time, total $6345"
   var invoiceNos = subject.match(/\bInvoices?:? *#?(\d{1,4})([, ]+#?\d{1,4})*/ig)
-  return parsed.invoiceNos =  invoiceNos ? invoiceNos[0].split(/[, ]+#?\b/).slice(1) : []
+
+  if (invoiceNos)
+    return parsed.invoiceNos = invoiceNos[0].trim().split(/[, ]+#?\b/).slice(1)
+
+  invoiceNos = subject.match(/(^| )#?(\d{1,4})([, ]+#?\d{1,4})* +Invoices?/ig)
+
+  if (invoiceNos)
+    return parsed.invoiceNos = invoiceNos[0].trim().split(/[, ]+#?\b/).slice(0, -1)
+
+  return parsed.invoiceNos = []
 }
 
 function findInvoiceAmts(parsed) {
