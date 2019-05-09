@@ -66,7 +66,7 @@ function getRecentExpenses(days){
   for(var i in res.QueryResponse.Purchase) {
     var expense = res.QueryResponse.Purchase[i]
     //Couldn't figure out how to do include account in query's WHERE, so filter the results here instead
-    if ( ! expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name || expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name == "Uncategorized Expense")
+    if ( ! expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name || expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name == "9999 Uncategorized:Uncategorized - Expenses")
       expenses.push({
         id:getTxnId(expense, i),
         date:expense.TxnDate,
