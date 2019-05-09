@@ -141,6 +141,34 @@ function defaultTotal(parsed, body) {
     parsed.amts.push(parsed.total)
     parsed.totalType = "max amt in email"
   }
+
+  else if (parsed.amts.length == 1 && parsed.amts[0] == sum(parsed.invoiceAmts)) {
+      /* TO AVOID THE FOLLOWING:
+        – Can you please specify the total for this receipt?
+        – Did you specify the correct amount and invoices because $0 does not match 1905+1905 = $3810?
+
+        Here is my best attempt to understand your current receipt:
+        {
+          "submitted":"2019-05-06 Invoices 1790 US Ongoing CPCO $1905.00",
+          "date":"2019-05-06",
+          "invoiceNos":["1790"],
+          "invoiceAmts":[1905],
+          "amts":["1905"],
+          "percents":["100"],
+          "total":null,
+          "totalType":null,
+          "inEmail":["1905"],
+          "attachments":0,
+          "classes":["100 Program:150 SIRUM US"],
+          "accounts":["Program Revenue - Recipient Fees:Pharmacy of Central Ohio"],
+          "vendors":[],
+          "from":"George Wang"
+        }*/
+
+        parsed.total = parsed.amts[0]
+        parsed.amts  = []
+        parsed.totalType = "single amt is a total for invoices"
+  }
 }
 
 //Remove $ and , in amts e.g. $26,000 -> 26000
