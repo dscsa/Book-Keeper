@@ -370,7 +370,7 @@ function addInvoicePayment(txn, parsed) {
   res = JSON.parse(res)
 
   if ( ! res.Payment || ! res.Payment.Line.length) {
-    debugEmail('Error linking invoices to deposit!', payment, res)
+    debugEmail('Error creating payment that links the invoices to the deposit!', 'DOUBLE CHECK THAT ALL CUSTOMERS/DONORS are nested under "Unrestricted Internally" and are maked "Bill with Parent"', 'payment', payment, 'res', res, 'invoices', invoices)
     throw res
   }
 
