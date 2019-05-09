@@ -110,12 +110,7 @@ function defaultTotal(parsed, body) {
 
   //debugEmail('defaultTotal invoked', allAmts, parsed)
 
-  if (sumAmts && parsed.attachments) {
-    parsed.total = sumAmts
-    parsed.totalType = "attachment"
-  }
-
-  else if (allAmts.length == 1 && parsed.inEmail.length == 0) { //Assume it's in an email attachment
+  if (allAmts.length == 1 && parsed.inEmail.length == 0) { //Assume it's in an email attachment
     parsed.total = allAmts[0]
     parsed.totalType = "single amt"
   }
@@ -168,6 +163,11 @@ function defaultTotal(parsed, body) {
         parsed.total = parsed.amts[0]
         parsed.amts  = []
         parsed.totalType = "single amt is a total for invoices"
+  }
+
+  else if (sumAmts && parsed.attachments) {
+    parsed.total = sumAmts
+    parsed.totalType = "attachment"
   }
 }
 
