@@ -37,7 +37,7 @@ function missingReceipts() {
     }, '')
 
     // 'office@sirum.org',
-    sendEmail('paloalto@sirum.org', "This Week's Missing Receipts", [
+    sendEmail('paloalto@sirum.org, sirum@jitasa.is', "This Week's Missing Receipts", [
       'Hello Team,',
       '',
       'I hope you all are well! I was going through the books and saw a couple of transactions that are missing receipts.',
