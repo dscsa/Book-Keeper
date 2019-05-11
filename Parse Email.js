@@ -120,11 +120,6 @@ function defaultTotal(parsed, body) {
     parsed.totalType = "single amt matching email amt or total"
   }
 
-  else if (allAmts.length > 1 && inOrSum(parsed.inEmail, sumAmts)) {//several amts in smight but no total have been explicly sent in the subject
-    parsed.total = sumAmts
-    parsed.totalType = "sum of amts matching email"
-  }
-
   else if (bodyTotal) {
     parsed.total = bodyTotal[2] || bodyTotal[3]
     if (allAmts.length == 0) parsed.amts.push(parsed.total)
@@ -163,6 +158,11 @@ function defaultTotal(parsed, body) {
         parsed.total = parsed.amts[0]
         parsed.amts  = []
         parsed.totalType = "single amt is a total for invoices"
+  }
+
+  else if (allAmts.length > 1 && inOrSum(parsed.inEmail, sumAmts)) {//several amts in smight but no total have been explicly sent in the subject
+    parsed.total = sumAmts
+    parsed.totalType = "sum of amts matching email"
   }
 
   else if (sumAmts && parsed.attachments) {
