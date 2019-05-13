@@ -93,8 +93,9 @@ function defaultTotal(parsed, body) {
   if (parsed.total) return
 
   //Only Searching BEFORE "We hope to see you again soon." Avoids getting higher prices for "Buy It Again", "Bargain Recommendations", and "Customers who bought ... also bought"
+  body = body.split(/Top Picks for You|We hope to see you again soon|Buy It Again|We hope to see you again soon.|Bargain Recommendations|Customers who bought|Recommended for you|Because you shopped for similar items|Return or replace items|Recommendations for items|Recommended items/i)[0]
 
-  var matches = body.split(/Top Picks for You|We hope to see you again soon|Buy It Again|Bargain Recommendations|Customers who bought|Recommended for you|Because you shopped for similar items|Return or replace items|Recommendations for items/i)[0].match(amtRegEx)
+  var matches = body.match(amtRegEx)
   parsed.inEmail = matches ? cleanAmts(matches) : []
 
   var allAmts = parsed.amts.concat(parsed.invoiceAmts)
