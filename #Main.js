@@ -124,10 +124,13 @@ function processPendingThread(thread, label) {
     return addLabel(thread, 'Other Error')
   }
 
-  var now  = new Date()
+  var numDays   = 5+7
+  var endDate   = new Date(parsed.date)
+  endDate.setDate(endDate.getDate()+numDays)
 
-  if (now.getHours() == '10')
-    debugEmail('processPendingThread', 'label', label, 'message.getSubject()', message.getSubject(), 'parsed', parsed, 'expenses', txns)
+  if (endDate <= new Date()) {
+    return noMatchesStopLooking(message, parsed, 'a date within '+numDays+' days of '+parsed.date+' ('+endDate+')', thread)
+  }
 
   if (txns.length == 1 && parsed.invoiceNos.length)
     return matchDeposit2Invoices(txns[0], parsed, thread, label)
@@ -150,12 +153,6 @@ function processPendingThread(thread, label) {
 
   if (txns.length > 1)
     return multipleMatches(message, parsed, txns, thread)
-
-  var endDate   = new Date(parsed.date)
-  endDate.setDate(endDate.getDate()+5+7)
-
-  if (endDate <= new Date())
-    return noMatchesStopLooking(message, parsed, txns, thread)
 
   addLabel(thread, 'Awaiting Match')
 
@@ -265,7 +262,7 @@ function noMatchesStopLooking(message, parsed, txns, thread) {
   removeLabel(thread, 'Multiple Matches')
   removeLabel(thread, 'Awaiting Match')
   removeLabel(thread, 'Successful Match')
-  reply(message, 'Thanks for submitting your receipt. Unfortunately, I could not find a matching expense/deposit with '+txns.query.split('WHERE')[1]+'. If necessary, please check the date and amount of your receipt below and resubmit:<br><pre>'+prettyJson(parsed)+'</pre>')
+  reply(message, 'Thanks for submitting your receipt. Unfortunately, I could not find a matching expense/deposit with '+(txns.query ? txns.query.split('WHERE')[1] : txns)+'. If necessary, please check the date and amount of your receipt below and resubmit:<br><pre>'+prettyJson(parsed)+'</pre>')
   addLabel(thread, 'No Matches')
 }
 
