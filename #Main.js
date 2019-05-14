@@ -155,9 +155,7 @@ function processPendingThread(thread, label) {
     return multipleMatches(message, parsed, txns, thread)
 
   addLabel(thread, 'Awaiting Match')
-
-  if (label == 'Awaiting Match' && (now.getDate() != 'Monday' || now.getHours() != '10')) return //Check Awaiting Match every hour but only Email on Mondays at 10am
-
+ 
   var cannotFind = label == 'Awaiting Match' ? 'still cannot not' : 'can no longer'
   reply(message, 'I just wanted to send you a brief update on your receipt:<br><pre>'+prettyJson(parsed)+'</pre>Unfortunately, I '+cannotFind+' find a transaction matching '+txns.query.split('WHERE')[1]+', but will keep checking each day until I find one or you reply telling me to "cancel"<br>')
 }
