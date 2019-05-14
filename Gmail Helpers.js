@@ -67,7 +67,7 @@ function getFrom(message) {
 
 function getName(message) {
   var from = getFrom(message)
-  var name = from.replace(/<.*?>/g, '').split(/ |@|_|\./) //Remove any hyperlinks and try to get the first name only
+  var name = from.replace(/<.*?>|"/g, '').split(/ |@|_|\./) //Remove any hyperlinks and try to get the first name only
 
   if (name[0].length < 2 || ! name[1] || name[1].length < 2)
     return {
