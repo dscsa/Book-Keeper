@@ -124,7 +124,7 @@ function processPendingThread(thread, label) {
     return addLabel(thread, 'Other Error')
   }
 
-  setEndDate(txns)
+  setEndDate(txns, parsed)
 
   if ( ! txns.length && txns.endDate > new Date())
     return noMatchesStopLooking(message, parsed, txns, thread)
@@ -212,7 +212,7 @@ function processNewThread(thread) {
     return addLabel(thread, 'Parse Error')
   }
 
-  setEndDate(txns)
+  setEndDate(txns, parsed)
   //debugEmail('parsed', 'subject', subject, 'parsed', parsed, 'txns', txns)
 
   if ( ! txns.length && txns.endDate > new Date())
@@ -228,7 +228,7 @@ function processNewThread(thread) {
     successfulMatch(message, parsed, txns, thread)
 }
 
-function setEndDate(txns) {
+function setEndDate(txns, parsed) {
   var numDays  = 5+2 //Two days past match date just in case QBO bank feed is slow to pick things up
   txns.endDate = new Date(parsed.date)
   txns.endDate.setDate(txns.endDate.getDate()+numDays)
