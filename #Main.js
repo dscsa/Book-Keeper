@@ -129,7 +129,7 @@ function processPendingThread(thread, label) {
   endDate.setDate(endDate.getDate()+numDays)
 
   if (endDate <= new Date()) {
-    return noMatchesStopLooking(message, parsed, 'a date within '+numDays+' days of '+parsed.date+' ('+endDate+')', thread)
+    return noMatchesStopLooking(message, parsed, 'a date within '+numDays+' days of '+parsed.date+' ('+endDate.toJSON().slice(0, 10)+')', thread)
   }
 
   if (txns.length == 1 && parsed.invoiceNos.length)
@@ -154,10 +154,7 @@ function processPendingThread(thread, label) {
   if (txns.length > 1)
     return multipleMatches(message, parsed, txns, thread)
 
-  addLabel(thread, 'Awaiting Match')
-
-  var cannotFind = label == 'Awaiting Match' ? 'still cannot not' : 'can no longer'
-  reply(message, 'I just wanted to send you a brief update on your receipt:<br><pre>'+prettyJson(parsed)+'</pre>Unfortunately, I '+cannotFind+' find a transaction matching '+txns.query.split('WHERE')[1]+', but will keep checking each day until I find one or you reply telling me to "cancel"<br>')
+  noMatchesKeepLooking(message, parsed, txns, thread)
 }
 
 function processNewThread(thread) {
