@@ -124,13 +124,10 @@ function processPendingThread(thread, label) {
     return addLabel(thread, 'Other Error')
   }
 
-  var numDays   = 5+7
-  var endDate   = new Date(parsed.date)
-  endDate.setDate(endDate.getDate()+numDays)
+  setEndDate(txns)
 
-  if (endDate <= new Date()) {
-    return noMatchesStopLooking(message, parsed, 'a date within '+numDays+' days of '+parsed.date+' ('+endDate.toJSON().slice(0, 10)+')', thread)
-  }
+  if ( ! txns.length && txns.endDate > new Date())
+    return noMatchesStopLooking(message, parsed, txns, thread)
 
   if (txns.length == 1 && parsed.invoiceNos.length)
     return matchDeposit2Invoices(txns[0], parsed, thread, label)
@@ -200,9 +197,6 @@ function processNewThread(thread) {
   if ( ! txnId && txns.length == 1)
     validVendor(parsed, txns[0].id)
 
-  txns.endDate = new Date(parsed.date)
-  txns.endDate.setDate(txns.endDate.getDate()+5+7) //One week past match date just in case QBO bank feed is slow to pick things up
-
   if (Math.abs(new Date() - txns.endDate)/1000/60/60/24 > 365) parsed.errors.push('Are you sure you specified the correct year?')
 
   var errors = parsed.errors
@@ -218,6 +212,7 @@ function processNewThread(thread) {
     return addLabel(thread, 'Parse Error')
   }
 
+  setEndDate(txns)
   //debugEmail('parsed', 'subject', subject, 'parsed', parsed, 'txns', txns)
 
   if ( ! txns.length && txns.endDate > new Date())
@@ -231,6 +226,12 @@ function processNewThread(thread) {
 
   else //txns.length == 1
     successfulMatch(message, parsed, txns, thread)
+}
+
+function setEndDate(txns) {
+  var numDays  = 5+2 //Two days past match date just in case QBO bank feed is slow to pick things up
+  txns.endDate = new Date(parsed.date)
+  txns.endDate.setDate(txns.endDate.getDate()+numDays)
 }
 
 function searchTxns(parsed) {
@@ -257,7 +258,7 @@ function noMatchesStopLooking(message, parsed, txns, thread) {
   removeLabel(thread, 'Multiple Matches')
   removeLabel(thread, 'Awaiting Match')
   removeLabel(thread, 'Successful Match')
-  reply(message, 'Thanks for submitting your receipt. Unfortunately, I could not find a matching expense/deposit with '+(txns.query ? txns.query.split('WHERE')[1] : txns)+'. If necessary, please check the date and amount of your receipt below and resubmit:<br><pre>'+prettyJson(parsed)+'</pre>')
+  reply(message, 'Thanks for submitting your receipt. Unfortunately, I could not find a matching expense/deposit with '+txns.query.split('WHERE')[1]+'. Since it is passed '+txns.endDate.toJSON().slice(0, 10)+', I am going to stop checking.  If necessary, please resubmit with a different date and/or amount:<br><pre>'+prettyJson(parsed)+'</pre>')
   addLabel(thread, 'No Matches')
 }
 
