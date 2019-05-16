@@ -126,7 +126,7 @@ function processPendingThread(thread, label) {
 
   setEndDate(txns, parsed)
 
-  if ( ! txns.length && txns.endDate > new Date())
+  if ( ! txns.length && txns.endDate <= new Date())
     return noMatchesStopLooking(message, parsed, txns, thread)
 
   if (txns.length == 1 && parsed.invoiceNos.length)
@@ -215,7 +215,7 @@ function processNewThread(thread) {
   setEndDate(txns, parsed)
   //debugEmail('parsed', 'subject', subject, 'parsed', parsed, 'txns', txns)
 
-  if ( ! txns.length && txns.endDate > new Date())
+  if ( ! txns.length && txns.endDate <= new Date())
     noMatchesKeepLooking(message, parsed, txns, thread)
 
   else if ( ! txns.length)
