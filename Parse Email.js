@@ -4,7 +4,7 @@
 //Test Case "Fwd: 2017-12-27 One-Time GLG $1000, Long Foundation $25,000, Cecilia Henig Individual $100, total $26,100"
 //Make sure 33.33% is not registered as an amount
 var amtRegEx = /-?\$?-?[\d,]*\d\.\d{2}(?!%)\b|-?\$-?[\d,]*\d\b/g
-var isTotal = /(\btotal:? |= ?)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?!:? \d|:? \$)/i
+var isTotal = /(\btotal:? |= *)\$?([\d,.]*\d\b)|\$?([\d,.]*\d\b) total(?!:? \d|:? \$)/i
 
 function findTotal(parsed, body) {
   //Use the ending "(?! \d| \$)" to make sure "Fwd: 2017-11-13 Background Check One-Time GP 14.93 501c3 14.93 Total 29.86" match 29.86 and not 14.93.
@@ -103,7 +103,7 @@ function defaultTotal(parsed, body) {
   //Amt labeled total in the body of the email
   var shortBody = body.split('- Forwarded message -')
   shortBody = shortBody[0]+shortBody[1] //Don't include everything in forwarding chain since it might have lots of stuff
-  var bodyTotal = shortBody.match(isTotal)
+  var bodyTotal = shortBody.replace(/https?:[^\s]+/g, '').match(isTotal) //some urls were being mistaken as urls.  Google Apps Scripts doesn't support negative lookbehinds in RegEx so this is easier
 
   var sumAmts = sum(allAmts)
 

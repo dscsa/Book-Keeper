@@ -129,6 +129,9 @@ function processPendingThread(thread, label) {
   if ( ! txns.length && txns.endDate <= new Date())
     return noMatchesStopLooking(message, parsed, txns, thread)
 
+  if ( ! txns.length)
+    return noMatchesKeepLooking(message, parsed, txns, thread)
+
   if (txns.length == 1 && parsed.invoiceNos.length)
     return matchDeposit2Invoices(txns[0], parsed, thread, label)
 
@@ -142,16 +145,13 @@ function processPendingThread(thread, label) {
 
   removeLabel(thread, label)
 
-  if (txns.length == 1) {
-    //debugEmail('parsed.errors.length', 'subject', subject, 'parsed', parsed, 'message.getFrom()', message.getFrom())
-    reply(message, error+'<br><br>This is how I understand your receipt:<br><pre>'+prettyJson(parsed)+'</pre>I found the matching expense/deposit below but can only add it if you resend me the receipt with exactly one vendor:<br><pre>'+prettyJson(txns)+'</pre>')
-    return addLabel(thread, 'Parse Error')
-  }
-
   if (txns.length > 1)
     return multipleMatches(message, parsed, txns, thread)
 
-  noMatchesKeepLooking(message, parsed, txns, thread)
+  //txns.length == 1 && ! validVendor && ! invoiceNos.length
+  //debugEmail('parsed.errors.length', 'subject', subject, 'parsed', parsed, 'message.getFrom()', message.getFrom())
+  reply(message, error+'<br><br>This is how I understand your receipt:<br><pre>'+prettyJson(parsed)+'</pre>I found the matching expense/deposit below but can only add it if you resend me the receipt with exactly one vendor:<br><pre>'+prettyJson(txns)+'</pre>')
+  addLabel(thread, 'Parse Error')
 }
 
 function processNewThread(thread) {
@@ -213,19 +213,18 @@ function processNewThread(thread) {
   }
 
   setEndDate(txns, parsed)
-  //debugEmail('parsed', 'subject', subject, 'parsed', parsed, 'txns', txns)
 
   if ( ! txns.length && txns.endDate <= new Date())
-    noMatchesKeepLooking(message, parsed, txns, thread)
+    return noMatchesStopLooking(message, parsed, txns, thread)
 
-  else if ( ! txns.length)
-    noMatchesStopLooking(message, parsed, txns, thread)
+  if ( ! txns.length)
+    return noMatchesKeepLooking(message, parsed, txns, thread)
 
-  else if (txns.length > 1)
-    multipleMatches(message, parsed, txns, thread)
+  if (txns.length > 1)
+    return multipleMatches(message, parsed, txns, thread)
 
-  else //txns.length == 1
-    successfulMatch(message, parsed, txns, thread)
+  //txns.length == 1
+  successfulMatch(message, parsed, txns, thread)
 }
 
 function setEndDate(txns, parsed) {
