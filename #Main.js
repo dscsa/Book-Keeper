@@ -249,7 +249,8 @@ function searchTxns(parsed) {
 }
 
 function validVendor(parsed, txnId) {
-  if (txnId[0] != 'C' || parsed.vendors.length == 1 || ~ parsed.subject.indexOf('reimbursement') || ~ parsed.subject.indexOf('refund') || ~ parsed.subject.indexOf('no vendor')) return true //e.g. Reimbursement to Kiah for destruction doesn't need a vendor or a 1099
+  var submitted = parsed.submitted.toLowerCase() //don't use parsed.subject because our keywords may have been removed
+  if (txnId[0] != 'C' || parsed.vendors.length == 1 || ~ submitted.indexOf('reimbursement') || ~ submitted.indexOf('refund') || ~ submitted.indexOf('no vendor')) return true //e.g. Reimbursement to Kiah for destruction doesn't need a vendor or a 1099
   parsed.errors.push('Did you specify the '+getSheetLink('vendors', false)+' correctly? Form 1099 usually requires each check to have a vendor. Add "no vendor" is not applicable')
 }
 
@@ -353,7 +354,7 @@ function parseSubject(submitted, message) {
 
   submitted   = submitted.trim()
   var body    = message.getPlainBody ? message.getPlainBody() : message
-  var subject = removeComments(submitted.trim())
+  var subject = removeComments(submitted.trim().toLowerCase())
   var name    = getName(message)
   var parsed  = { //Preserve ordering
     submitted:submitted,
