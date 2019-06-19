@@ -249,7 +249,7 @@ function searchTxns(parsed) {
 }
 
 function validVendor(parsed, txnId) {
-  if (txnId[0] != 'C' || parsed.vendors.length == 1 || ~ parsed.subject.indexOf('reimbursement')) return true //e.g. Reimbursement to Kiah for destruction doesn't need a vendor or a 1099
+  if (txnId[0] != 'C' || parsed.vendors.length == 1 || ~ parsed.subject.indexOf('reimbursement') || ~ parsed.subject.indexOf('refund')) return true //e.g. Reimbursement to Kiah for destruction doesn't need a vendor or a 1099
   parsed.errors.push('Did you specify the '+getSheetLink('vendors', false)+' correctly? Form 1099 requires each check to have exactly one vendor.')
 }
 
