@@ -251,7 +251,7 @@ function searchTxns(parsed) {
 function validVendor(parsed, txnId) {
   var submitted = parsed.submitted.toLowerCase() //don't use parsed.subject because our keywords may have been removed
   if (txnId[0] != 'C' || parsed.vendors.length == 1 || ~ submitted.indexOf('reimbursement') || ~ submitted.indexOf('refund') || ~ submitted.indexOf('no vendor')) return true //e.g. Reimbursement to Kiah for destruction doesn't need a vendor or a 1099
-  parsed.errors.push('Did you specify the '+getSheetLink('vendors', false)+' correctly? Form 1099 usually requires each check to have a vendor. Add "no vendor" is not applicable')
+  parsed.errors.push('Did you specify the '+getSheetLink('vendors', false)+' correctly? Form 1099 usually requires each check to have a vendor. Add "no vendor" to email subject is not applicable')
 }
 
 function noMatchesStopLooking(message, parsed, txns, thread) {
