@@ -282,7 +282,8 @@ function isUncategorizedExpense(expense, accountName) {
       if ( ! res) res = { memo:expense.PrivateNote ? expense.PrivateNote+' - ' : '', amt:0 }
       if (line.Description != expense.PrivateNote) {
         res.memo += line.AccountBasedExpenseLineDetail.Entity ? line.AccountBasedExpenseLineDetail.Entity.name+' ' : ''
-        res.memo += line.Description+' $'+line.Amount+', '
+        res.memo += line.Description || ''
+        res.memo += ' $'+line.Amount+', '
       }
       res.amt += line.Amount
     }
@@ -304,7 +305,8 @@ function isUncategorizedDeposit(deposit, accountName) {
       if ( ! res) res = { memo:deposit.PrivateNote ? deposit.PrivateNote+' - ' : '', amt:0 }
       if (line.Description != deposit.PrivateNote) {
         res.memo += line.DepositLineDetail.Entity ? line.DepositLineDetail.Entity.name+' ' : ''
-        res.memo += line.Description+' $'+line.Amount+', '
+        res.memo += line.Description || ''
+        res.memo += ' $'+line.Amount+', '
       }
       res.amt += line.Amount
     }
@@ -417,7 +419,7 @@ function addInvoicePayment(txn, parsed) {
 
   var earnedIncome = {
     value:"106",
-    name:"Accounts Receivable:Earned Income Receivable"
+    name:"1120 Receivable - Program Revenue"
   }
 
   oldTxn.Deposit.PrivateNote  = payment.PrivateNote
