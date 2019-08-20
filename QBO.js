@@ -415,13 +415,14 @@ function addInvoicePayment(txn, parsed) {
     throw res
   }
 
-  oldTxn.Deposit.PrivateNote  = payment.PrivateNote
-  oldTxn.Deposit.Line[0].Amount = 0 //We are replacing the deposit amount with a payment amount
-  oldTxn.Deposit.Line[0].DepositLineDetail.AccountRef = {
+  var earnedIncome = {
     value:"106",
     name:"Accounts Receivable:Earned Income Receivable"
   }
 
+  oldTxn.Deposit.PrivateNote  = payment.PrivateNote
+  oldTxn.Deposit.Line[0].Amount = 0 //We are replacing the deposit amount with a payment amount
+  oldTxn.Deposit.Line[0].DepositLineDetail.AccountRef = earnedIncome
   //Remove any 1999 Uncategorized Deposits Lines since we are adding a "Payment" in their place
   /* Example Line Item that we would remove
   {
@@ -459,6 +460,7 @@ function addInvoicePayment(txn, parsed) {
     if (detail && detail.AccountRef && detail.AccountRef.name == "1999 Uncategorized Deposits") {
       line.Description += ' $'+line.Amount
       line.Amount       = 0 //Since we are adding the payment with these, we need to set to 0 so we don't double count
+      detail.AccountRef = earnedIncome
     }
   }
 
