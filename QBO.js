@@ -66,12 +66,14 @@ function getRecentExpenses(days){
   for(var i in res.QueryResponse.Purchase) {
     var expense = res.QueryResponse.Purchase[i]
     //Couldn't figure out how to do include account in query's WHERE, so filter the results here instead
-    if ( ! expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name || expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name == "9999 Uncategorized:Uncategorized - Expenses")
+    var uncategorized = isUncategorizedExpense(expense, "9999 Uncategorized:Uncategorized - Expenses")
+    if (uncategorized)
       expenses.push({
         id:getTxnId(expense, i),
         date:expense.TxnDate,
-        memo:expense.Line[0].Description+' | '+(expense.Line[0].Description == expense.PrivateNote ? '' : ' | '+expense.PrivateNote), //+' | '+JSON.stringify(expense),
-        amt:(+expense.TotalAmt).toFixed(2),
+        memo:uncategorized.memo,
+        amt:uncategorized.amt.toFixed(2),
+        total:expense.TotalAmt.toFixed(2),
         bank:expense.AccountRef.name,
       })
   }
@@ -104,12 +106,14 @@ function getRecentDeposits(days){
     var deposit = res.QueryResponse.Deposit[i]
     //Couldn't figure out how to do include account in query's WHERE, so filter the results here instead
     //First Part (before the ||) is for Quickbooks Credit Card Payments of Invoices.  They don't have an AccountRef but do have a linked transaction
-    if (isUncategorizedDeposit(deposit, "1999 Uncategorized Deposits"))
+    var uncategorized = isUncategorizedDeposit(deposit, "1999 Uncategorized Deposits")
+    if (uncategorized)
       deposits.push({
         id:getTxnId(deposit),
         date:deposit.TxnDate,
-        memo:deposit.Line[0].Description+(deposit.Line[0].Description == deposit.PrivateNote ? '' : ' | '+deposit.PrivateNote), //+' | '+JSON.stringify(deposit),
-        amt:(+deposit.TotalAmt).toFixed(2),
+        memo:uncategorized.memo,
+        amt:uncategorized.amt.toFixed(2),
+        total:deposit.TotalAmt.toFixed(2),
         bank:deposit.DepositToAccountRef.name,
       })
   }
@@ -145,13 +149,10 @@ function searchExpenses(amt, date, account){
   startDate.setDate(startDate.getDate()-3)
   endDate.setDate(endDate.getDate()+5)
 
-  var lowAmt  = +amt - 1
-  var highAmt = +amt + 1
-
   var account = account || "9999 Uncategorized:Uncategorized - Expenses"
   var expenses = []
 
-  expenses.query = "SELECT * FROM Purchase WHERE TotalAmt > '"+lowAmt.toFixed(2)+"' and TotalAmt < '"+highAmt.toFixed(2)+"' and TxnDate > '" + startDate.toJSON().slice(0, 10) + "' and TxnDate < '" + endDate.toJSON().slice(0, 10) + "'"
+  expenses.query = "SELECT * FROM Purchase WHERE TxnDate > '" + startDate.toJSON().slice(0, 10) + "' and TxnDate < '" + endDate.toJSON().slice(0, 10) + "'" //This works but doesn't account for partialy uncategorized expenses: TotalAmt > '"+lowAmt.toFixed(2)+"' and TotalAmt < '"+highAmt.toFixed(2)+"' and ( var lowAmt  = +amt - 1;   var highAmt = +amt + 1)
   var res = queryQBO(expenses.query, service)
 
   if(res.Fault)
@@ -162,13 +163,15 @@ function searchExpenses(amt, date, account){
   for(var i in res.QueryResponse.Purchase){
     var expense = res.QueryResponse.Purchase[i]
     //Couldn't figure out how to do include account in query's WHERE, so filter the results here instead
-    if ( ! expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name || expense.Line[0].AccountBasedExpenseLineDetail.AccountRef.name == account)
+    var uncategorized = isUncategorizedExpense(expense, account)
+    if (uncategorized.memo && uncategorized.amt > +amt - 1 && uncategorized.amt < +amt + 1)
       expenses.push({
         id:getTxnId(expense),
         date:expense.TxnDate,
-        memo:expense.PrivateNote,
-        amt:(+expense.TotalAmt).toFixed(2),
-        exact:expense.TotalAmt == amt, //Should this be based on DATE too?
+        memo:uncategorized.memo,
+        amt:uncategorized.amt.toFixed(2),
+        total:expense.TotalAmt.toFixed(2),
+        exact:uncategorized.amt == amt, //Should this be based on DATE too?
         account:account,
         bank:expense.AccountRef.name,
       })
@@ -211,14 +214,16 @@ function searchDeposits(amt, date, account){
     var deposit = res.QueryResponse.Deposit[i]
     //Couldn't figure out how to do include account or TotalAmt in query's WHERE, so filter the results here instead
     //This matches
-    if (deposit.TotalAmt > +amt - 1 && deposit.TotalAmt < +amt + 1 && isUncategorizedDeposit(deposit, account)) {
-      Log("DEBUG DEPOSIT FILTER:", deposit.TotalAmt, +amt - 1, +amt + 1)
+    var uncategorized = isUncategorizedDeposit(deposit, account)
+    if (uncategorized.memo && uncategorized.amt > +amt - 1 && uncategorized.amt < +amt + 1) {
+      Log("DEBUG DEPOSIT FILTER:", uncategorized, deposit.TotalAmt, +amt - 1, +amt + 1)
       deposits.push({
         id:getTxnId(deposit),
         date:deposit.TxnDate,
-        memo:deposit.PrivateNote,
-        amt:(+deposit.TotalAmt).toFixed(2),
-        exact:deposit.TotalAmt == amt,  //Should this be based on DATE too?
+        memo:uncategorized.memo,
+        amt:uncategorized.amt.toFixed(2),
+        total:deposit.TotalAmt.toFixed(2),
+        exact:uncategorized.amt == amt,  //Should this be based on DATE too?
         account:account,
         bank:deposit.DepositToAccountRef.name,
       })
@@ -266,10 +271,46 @@ function getInvoices(docNumbers) {
   return res.QueryResponse.Invoice
 }
 
+//Returns false if no transaction lines are uncategorized.  Or a concatentation of all line memos and total amount that is uncategorized (truthy)
+function isUncategorizedExpense(expense, accountName) {
+
+  return expense.Line.reduce(function(res, line){
+
+    var name = line.AccountBasedExpenseLineDetail.AccountRef.name
+
+    if ( ! name || name == accountName) {
+      if ( ! res) res = { memo:expense.PrivateNote ? expense.PrivateNote+' - ' : '', amt:0 }
+      if (line.Description != expense.PrivateNote) {
+        res.memo += line.AccountBasedExpenseLineDetail.Entity ? line.AccountBasedExpenseLineDetail.Entity.name+' ' : ''
+        res.memo += line.Description+' $'+line.Amount+', '
+      }
+      res.amt += line.Amount
+    }
+
+    return res
+
+  }, false)
+}
+
 //Quickbooks Credit Card Payments of Invoices don't have an AccountRef but do have a linked transaction
+//Returns false if no transaction lines are uncategorized.  Or a concatentation of all line memos and total amount that is uncategorized (truthy)
 function isUncategorizedDeposit(deposit, accountName) {
-  var account = deposit.Line[0].DepositLineDetail.AccountRef
-  return account ? account.name == accountName : !deposit.Line[0].LinkedTxn
+
+  return deposit.Line.reduce(function(res, line){
+
+    //if ( ! account) debugEmail('Deposit Line Item does not have an account', accountName, line, deposit)
+
+    if ( ! line.LinkedTxn && line.DepositLineDetail.AccountRef.name == accountName) {
+      if ( ! res) res = { memo:deposit.PrivateNote ? deposit.PrivateNote+' - ' : '', amt:0 }
+      if (line.Description != deposit.PrivateNote) {
+        res.memo += line.DepositLineDetail.Entity ? line.DepositLineDetail.Entity.name+' ' : ''
+        res.memo += line.Description+' $'+line.Amount+', '
+      }
+      res.amt += line.Amount
+    }
+
+    return res
+  }, false)
 }
 
 //Return exact matches if there are any, otherwise return all matches
@@ -375,10 +416,50 @@ function addInvoicePayment(txn, parsed) {
   }
 
   oldTxn.Deposit.PrivateNote  = payment.PrivateNote
-  oldTxn.Deposit.Line[0].Amount = 0
+  oldTxn.Deposit.Line[0].Amount = 0 //We are replacing the deposit amount with a payment amount
   oldTxn.Deposit.Line[0].DepositLineDetail.AccountRef = {
     value:"106",
     name:"Accounts Receivable:Earned Income Receivable"
+  }
+
+  //Remove any 1999 Uncategorized Deposits Lines since we are adding a "Payment" in their place
+  /* Example Line Item that we would remove
+  {
+   "Id": "2",
+   "LineNum": 2,
+   "Description": "CK 23564",
+   "Amount": 250,
+   "DetailType": "DepositLineDetail",
+   "DepositLineDetail": {
+    "Entity": {
+     "value": "679",
+     "name": "Arapahoe LTC Investors, LLC",
+     "type": "CUSTOMER"
+    },
+    "AccountRef": {
+     "value": "432",
+     "name": "1999 Uncategorized Deposits"
+    },
+    "PaymentMethodRef": {
+     "value": "12",
+     "name": "Check"
+    },
+    "CheckNum": "23564"
+   }
+  },*/
+
+  var LinkedTxn =
+
+  //Attach a LinkedTxn to all Uncategorized Deposits Line Items in this Transaction
+  for (var i in oldTxn.Deposit.Line) {
+
+    var line   = oldTxn.Deposit.Line[i]
+    var detail = line.DepositLineDetail
+
+    if (detail && detail.AccountRef && detail.AccountRef.name == "1999 Uncategorized Deposits") {
+      line.Description += ' $'+line.Amount
+      line.Amount       = 0 //Since we are adding the payment with these, we need to set to 0 so we don't double count
+    }
   }
 
   oldTxn.Deposit.Line.push({

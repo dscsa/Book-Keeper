@@ -33,7 +33,7 @@ function missingReceipts() {
     if ( ! txns.length) return sendEmail("No Missing Receipts Today!")
 
     var csv = txns.reduce(function(line, txn) {
-      return line+'<br>'+txn.date+('       $'+txn.amt).slice(txn.amt.length-3)+' <a href="https://qbo.intuit.com/app/'+getEntityName(txn.id)+'?txnId='+txn.id.slice(1)+'">'+getEntityName(txn.id)+'</a>, '+txn.bank+', '+(txn.memo && txn.memo.replace(/ {2,}/g, ' '))
+      return line+'<br>'+txn.date+('       $'+txn.amt).slice(txn.amt.length-3)+' of'+('       $'+txn.total).slice(txn.total.length-3)+' <a href="https://qbo.intuit.com/app/'+getEntityName(txn.id)+'?txnId='+txn.id.slice(1)+'">'+getEntityName(txn.id)+'</a>, '+txn.bank+', '+(txn.memo && txn.memo.replace(/ {2,}/g, ' '))
     }, '')
 
     // 'office@sirum.org',
