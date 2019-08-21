@@ -451,8 +451,6 @@ function addInvoicePayment(txn, parsed) {
    }
   },*/
 
-  var LinkedTxn =
-
   //Attach a LinkedTxn to all Uncategorized Deposits Line Items in this Transaction
   for (var i in oldTxn.Deposit.Line) {
 

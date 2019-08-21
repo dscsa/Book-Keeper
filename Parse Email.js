@@ -13,6 +13,8 @@ function findTotal(parsed, body) {
   var subject  = parsed.subject
   var isMatch  = subject.match(isTotal) //match totals e.g, $0.89+$0.44 = $1.33 or total $133 or $133 total
 
+  //debugEmail('findTotal', subject, isMatch, isTotal)
+
   if (isMatch)
     var total = cleanAmts([isMatch[2] || isMatch[3]])[0] //total will always be the 2nd or third capture group
 
