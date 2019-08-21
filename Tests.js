@@ -265,3 +265,27 @@ function testing() {
   for (var i in msgs)
     Log(parseTo(msgs[i]),  msgs[i].getTo(), msgs[i].getRawContent())
 }
+
+function getAllAccountRefs() {
+   var res = _getAllAccountRefs()
+   debugEmail("getAllAccountRefs", res)
+}
+function _getAllAccountRefs() {
+
+  //If Class starts with 0 Prorgam then we append Entity
+  var service = getService();
+
+  if ( ! service.hasAccess())
+    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+
+  var query = 'SELECT FullyQualifiedName FROM Account MAXRESULTS 1000'
+
+  var res = queryQBO(query, service)
+
+  Log('getAccountRefs', query, res)
+
+  if(res.Fault || ! res.QueryResponse.Account)
+    return debugEmail("Error: Couldn't match all Accounts!", query, res)
+
+  return res.QueryResponse.Account
+}
