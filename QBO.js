@@ -152,7 +152,7 @@ function searchExpenses(amt, date, account){
   var account = account || "9999 Uncategorized:Uncategorized - Expenses"
   var expenses = []
 
-  expenses.query = "SELECT * FROM Purchase WHERE TxnDate > '" + startDate.toJSON().slice(0, 10) + "' and TxnDate < '" + endDate.toJSON().slice(0, 10) + "'" //This works but doesn't account for partialy uncategorized expenses: TotalAmt > '"+lowAmt.toFixed(2)+"' and TotalAmt < '"+highAmt.toFixed(2)+"' and ( var lowAmt  = +amt - 1;   var highAmt = +amt + 1)
+  expenses.query = "SELECT * FROM Purchase WHERE TxnDate > '" + startDate.toJSON().slice(0, 10) + "' and TxnDate < '" + endDate.toJSON().slice(0, 10) + "' MAXRESULTS 1000" //This works but doesn't account for partialy uncategorized expenses: TotalAmt > '"+lowAmt.toFixed(2)+"' and TotalAmt < '"+highAmt.toFixed(2)+"' and ( var lowAmt  = +amt - 1;   var highAmt = +amt + 1)
   var res = queryQBO(expenses.query, service)
 
   if(res.Fault)
@@ -204,7 +204,7 @@ function searchDeposits(amt, date, account){
   var account = account
   var deposits = []
 
-  deposits.query = "SELECT * FROM Deposit WHERE TxnDate > '" + startDate.toJSON().slice(0, 10) + "' and TxnDate < '" + endDate.toJSON().slice(0, 10) + "'"
+  deposits.query = "SELECT * FROM Deposit WHERE TxnDate > '" + startDate.toJSON().slice(0, 10) + "' and TxnDate < '" + endDate.toJSON().slice(0, 10) + "' MAXRESULTS 1000"
   var res = queryQBO(deposits.query, service)
 
   if(res.Fault)
