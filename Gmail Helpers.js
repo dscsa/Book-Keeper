@@ -99,7 +99,7 @@ function reply(message, body, attachments, subject) {
     name:'Book Keeper',
     bcc:'adam.kircher@gmail.com',
     attachments:attachments,       //optional
-    subject:subject.slice(0, 250), //250 is maximum length https://developers.google.com/apps-script/reference/gmail/gmail-app#parameters_44
+    subject:subject || message.getSubject().slice(0, 250), //250 is maximum length https://developers.google.com/apps-script/reference/gmail/gmail-app#parameters_44
     htmlBody:'Hello '+name.first+' '+name.last+',<br><br>'+body+'<br>Thanks,<br><a href="https://docs.google.com/spreadsheets/d/1klEQQ7u73D8y1UdPLu2C3xChQ1ZlLfEpGfhACe9WNXQ/edit">Mr. Keeper</a><br><br>Saving Medicine : Saving Lives<br><br>-----<br><br>'+message.getBody()+'<br>'
   })
 }
