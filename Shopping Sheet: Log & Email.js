@@ -51,15 +51,15 @@ function sendEmail(to, subject, body, attachments) {
   var bcc = ''
 
   if ( ! to || ~ to.indexOf('@')) {
-    //to = 'adam@sirum.org'
+    //to = 'archive@sirum.org'
     if ( ! LIVE_MODE) to = ''
-    bcc = 'adam@sirum.org'
+    bcc = 'archive@sirum.org'
   }
   else {
     attachments = body
     body    = subject
     subject = to
-    to      = 'adam@sirum.org'
+    to      = 'archive@sirum.org'
   }
 
   try {
