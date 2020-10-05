@@ -195,7 +195,7 @@ function getPayment() {
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   var url = "https://quickbooks.api.intuit.com/v3/company/" + COMPANY_ID + "/payment/"+payment
   var oldTxn = UrlFetchApp.fetch(url,  {

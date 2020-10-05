@@ -26,7 +26,7 @@ function testNewRecent() {
    var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   var expenses = []
 
@@ -47,7 +47,7 @@ function getRecentExpenses(days){
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   //I shouldn't have to do it this way but GAS is doing weird things with dates right now
   var startDate = new Date()
@@ -88,7 +88,7 @@ function getRecentDeposits(days){
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   //I shouldn't have to do it this way but GAS is doing weird things with dates right now
   var startDate = new Date()
@@ -141,7 +141,7 @@ function searchExpenses(amt, date, account){
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   //I shouldn't have to do it this way but GAS is doing weird things with dates right now
   var startDate = new Date(date)
@@ -193,7 +193,7 @@ function searchDeposits(amt, date, account){
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   //I shouldn't have to do it this way but GAS is doing weird things with dates right now
   var startDate = new Date(date)
@@ -242,7 +242,7 @@ function getPayment(Id) {
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   query = "SELECT * FROM Payment WHERE Id = '" +Id + "'"
   var res = queryQBO(query, service)
@@ -350,7 +350,7 @@ function addInvoicePayment(txn, parsed) {
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
 
   var oldTxn = UrlFetchApp.fetch("https://quickbooks.api.intuit.com/v3/company/" + COMPANY_ID + "/deposit/"+txn.id.slice(1),  {
@@ -523,7 +523,7 @@ function classifyTxn(id, parsed){
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   var entityType   = getEntityType(id)
   var lineName     = getLineName(id)
@@ -602,7 +602,7 @@ function uploadPDF(id, blob){
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   blob = blob || DriveApp.getFileById(DriveApp.getFilesByName("123856-9452.pdf").next().getId()).getBlob();
 
@@ -656,7 +656,7 @@ function getClassRefs(classes){
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   var query = 'SELECT * FROM Class WHERE FullyQualifiedName IN ('+addQuotes(classes)+')'
 
@@ -697,7 +697,7 @@ function getVendorRefs(vendors) {
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+    return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   var query = 'SELECT * FROM Vendor WHERE DisplayName IN ('+addQuotes(vendors)+')'
 
@@ -724,7 +724,7 @@ function getAccountRefs(accounts) {
   var service = getService();
 
   if ( ! service.hasAccess())
-    return debugEmail('Open the following URL and re-run the script:', service.getAuthorizationUrl())
+   return sendEmail('adam@sirum.org', 'Open the following URL and re-run the script:', service.getAuthorizationUrl())
 
   var query = 'SELECT * FROM Account WHERE FullyQualifiedName IN ('+addQuotes(accounts)+')'
 
